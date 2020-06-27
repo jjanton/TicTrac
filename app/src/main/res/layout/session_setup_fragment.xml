@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ConstraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".session.presession.SessionSetupFragment">
+
+    <EditText
+        android:id="@+id/timerEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginBottom="16sp"
+        android:inputType="number"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/hapticFeedbackToggleButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <ToggleButton
+        android:id="@+id/hapticFeedbackToggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginBottom="16sp"
+        android:textOff="@string/haptic_feedback_off"
+        android:textOn="HAPTIC FEEDBACK: ON"
+        app:layout_constraintBottom_toTopOf="@+id/audioFeedbackToggleButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/timerEditText" />
+
+    <ToggleButton
+        android:id="@+id/audioFeedbackToggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginBottom="16sp"
+        android:textOff="AUDIO FEEDBACK: OFF"
+        android:textOn="AUDIO FEEDBACK: ON"
+        app:layout_constraintBottom_toTopOf="@+id/visualFeedbackToggleButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/hapticFeedbackToggleButton" />
+
+    <ToggleButton
+        android:id="@+id/visualFeedbackToggleButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginBottom="16sp"
+        android:textOff="VISUAL FEEDBACK: OFF"
+        android:textOn="VISUAL FEEDBACK: ON"
+        app:layout_constraintBottom_toTopOf="@+id/startSessionButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/audioFeedbackToggleButton" />
+
+    <Button
+        android:id="@+id/startSessionButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="100dp"
+        android:text="@string/begin_session"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
