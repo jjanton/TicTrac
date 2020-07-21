@@ -108,10 +108,11 @@ public class SessionFragment extends Fragment {
      * class DetermineMovementActivity.java
      */
     private void stopReadingMotionData() {
-        if (motionSensorActive) {
+//        if (motionSensorActive) {
             sensorManager.unregisterListener(motionEventListener);
-            motionSensorActive = true;
-        }
+            motionSensorActive = false;
+//        }
+
     }
 
 }
