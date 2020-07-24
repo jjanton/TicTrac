@@ -42,7 +42,7 @@ public class SessionFragment extends Fragment {
 
     // Audio Recorder stuff
     private MediaRecorder mediaRecorder;
-
+    private MaxAmplitudeRecorder amplitudeRecorder;
 
     private SessionViewModel mViewModel;
     private SessionDetails sessionDetails;
@@ -93,10 +93,12 @@ public class SessionFragment extends Fragment {
 
         // Start the motion and audio detection
         startReadingMotionData();
-//        startReadingAudioData();
+        startReadingAudioData();
+
+        //TODO: We aren't stopping the motion/audio listeners. Even if you go back to another activity,
+        // they are still active. We need to stop the listeners when appropriate (eg. when a session
+        // timer ends, or when the user closes the app, or navigates away from the session fragment)
     }
-
-
 
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
@@ -124,9 +126,7 @@ public class SessionFragment extends Fragment {
         sensorManager.unregisterListener(motionEventListener);
         motionSensorActive = false;
 //        }
-
     }
-
 
     /**
      * This method was referenced from Google documentation on MediaRecorder,
@@ -134,25 +134,21 @@ public class SessionFragment extends Fragment {
      * from Professional Android Sensor Programming, Milette & Stroud,
      */
     private void startReadingAudioData() {
-        //TODO: we need to start recording on a Thread. right now this locks up the main process
-
-        // This needs to exist even though we are not saving the audio files
+        // This storage needs to exist even though we are not saving the audio files
         String appStorageLocation =
                 getContext().getExternalFilesDir("temp_audio").getAbsolutePath()
                         + File.separator + "audio.3gp";
 
-        MaxAmplitudeRecorder amplitudeRecorder = new MaxAmplitudeRecorder(10000, appStorageLocation, getContext());
-        amplitudeRecorder.startRecording();
+        amplitudeRecorder = new MaxAmplitudeRecorder(10000, appStorageLocation, getContext());
+
+        RunnableThread runnableThread = new RunnableThread(amplitudeRecorder);
+        new Thread(runnableThread).start();
     }
 
-    /**
-     * This method was referenced from Google documentation on MediaRecorder,
-     * https://developer.android.com/guide/topics/media/mediarecorder
-     */
     private void stopReadingAudioData() {
-        mediaRecorder.stop();
-        mediaRecorder.release();
-        mediaRecorder = null;
+        if (amplitudeRecorder != null) {
+            amplitudeRecorder.stopRecording();
+        }
     }
 
 

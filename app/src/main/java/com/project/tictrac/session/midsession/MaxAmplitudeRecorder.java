@@ -63,10 +63,13 @@ public class MaxAmplitudeRecorder {
         stopRecording();
     }
 
+    /**
+     * This method was referenced from Google documentation on MediaRecorder,
+     * https://developer.android.com/guide/topics/media/mediarecorder
+     */
     public void stopRecording() {
         mediaRecorder.stop();
         mediaRecorder.release();
-//        mediaRecorder = null;
     }
 
 
