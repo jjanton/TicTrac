@@ -2,23 +2,25 @@ package com.project.tictrac.session.midsession;
 
 import android.content.Context;
 import android.media.MediaRecorder;
+import android.os.Handler;
+import android.view.View;
 
 import com.project.tictrac.Utils;
 
 import java.io.IOException;
 
+//TODO: request mic (and storage permissions?) from user. Check if they're available first
+
 /**
  * This class was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
  * and the example code that comes with the book, Class MaxAmplitudeRecorder
  */
-
-//TODO: request mic (and storage permissions?) from user. Check if they're available first
-
 public class MaxAmplitudeRecorder {
     // Constructor arguments
     private int amplitudeThreshold;
     private String tmpAudioFile;
     private Context context;
+    private SessionViewModel mViewModel;
 
     // Audio variables
     private AmplitudeClipListener clipListener;
@@ -29,21 +31,26 @@ public class MaxAmplitudeRecorder {
     private static final int THRESHOLD_MED = 18000;
     private static final int THRESHOLD_HIGH = 25000;
 
+    private Handler mViewModelHandler;
 
-    public MaxAmplitudeRecorder(int amplitudeThreshold, String tmpAudioFile, Context context) {
-        // Class variables
+
+
+    public MaxAmplitudeRecorder(int amplitudeThreshold, String tmpAudioFile, Context context, SessionViewModel mViewModel) {
         this.amplitudeThreshold = amplitudeThreshold;
         this.tmpAudioFile = tmpAudioFile;
         this.context = context;
+        this.mViewModel = mViewModel;
 
         this.continueRecording = false;
         this.clipListener = createAmplitudeClipListener(amplitudeThreshold);
+
+        mViewModelHandler = new Handler();
     }
 
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
      */
-    public void startRecording() {
+    public void startRecording()  {
         prepareMediaRecorder();
 
         boolean heard = false;
@@ -56,7 +63,17 @@ public class MaxAmplitudeRecorder {
 
             if (heard) {
                 Utils.vibrate(1000, context);
-                System.out.println("HEARD A SOUND!!!!!");
+
+                mViewModelHandler.post(() -> {
+                    mViewModel.incrementAudioCounter();
+                });
+            }
+
+            // Sleep the thread for a short time so the counter doesn't increase more than 1 per tic
+            try {
+                Thread.sleep(700);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
