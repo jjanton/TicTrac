@@ -2,22 +2,19 @@ package com.project.tictrac.session.midsession;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.VibrationEffect;
+import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.provider.Telephony;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,11 +25,16 @@ import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 import com.project.tictrac.session.presession.SessionDetails;
 
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
+
 import java.io.File;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.SENSOR_SERVICE;
-import static android.content.Context.VIBRATOR_SERVICE;
 
 public class SessionFragment extends Fragment {
     final String LOG = "AudioRecorder";
@@ -48,11 +50,13 @@ public class SessionFragment extends Fragment {
 
     private SessionViewModel mViewModel;
     private SessionDetails sessionDetails;
-    private TextView testTextView;
+    private TextView timer;
+    private CountDownTimer countDownTimer;
     private TextView motionCounter;
     private TextView audioCounter;
     private Button vibratorButton;
 
+    // nice.
     private Vibrator vibrator;
 
     //TODO: We aren't stopping the motion/audio listeners. Even if you go back to another activity,
@@ -73,9 +77,10 @@ public class SessionFragment extends Fragment {
         // View model setup
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
-        mViewModel = ViewModelProviders.of(this, factory).get(SessionViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
         // Get UI elements
+        timer = getView().findViewById(R.id.countdownTimer);
         vibratorButton = getView().findViewById(R.id.vibratorButton);
         motionCounter = getView().findViewById(R.id.motionCounter);
         audioCounter = getView().findViewById(R.id.audioCounter);
@@ -123,7 +128,17 @@ public class SessionFragment extends Fragment {
         // Extract info from SessionDetail object
         if (bundle.containsKey("details")) {
             sessionDetails = (SessionDetails) bundle.getSerializable("details");
-            System.out.println(sessionDetails.getTimerValue());
+            Date currentTime = new Date();
+            long currentMillis = currentTime.getTime();
+            long timerMillis = (TimeUnit.HOURS.toMillis(sessionDetails.getTimerHour()) + TimeUnit.HOURS.toMillis(sessionDetails.getTimerMinute()) - currentMillis);
+            timerMillis = timerMillis - (TimeUnit.HOURS.toMillis(LocalDateTime.now().getHour()) + TimeUnit.MINUTES.toMillis(LocalDateTime.now().getMinute()));
+            long hours = sessionDetails.getTimerHour() - LocalDateTime.now().getHour();
+            long minutes = sessionDetails.getTimerMinute() - LocalDateTime.now().getMinute();
+            timer.setText(hours + ":" + minutes);
+            System.out.println(LocalDateTime.now().getHour());
+            System.out.println(LocalDateTime.now().getMinute());
+            System.out.println(sessionDetails.getTimerHour());
+            System.out.println(sessionDetails.getTimerMinute());
         }
 
         // Make phone vibrate for 1/2 second every time button clicked

@@ -9,22 +9,26 @@ import java.io.Serializable;
  */
 public class SessionDetails implements Serializable {
 
-    private String timerValue;
+    private int timerHour;
+    private int timerMinute;
     private boolean hapticFeedback;
     private boolean audioFeedback;
     private boolean visualFeedback;
 
-    public SessionDetails(String timerValue, boolean hapticFeedback, boolean audioFeedback,
+    public SessionDetails(int timerHour, int timerMinute, boolean hapticFeedback, boolean audioFeedback,
                           boolean visualFeedback) {
-        this.timerValue = timerValue;
+        this.timerHour = timerHour;
+        this.timerMinute = timerMinute;
         this.hapticFeedback = hapticFeedback;
         this.audioFeedback = audioFeedback;
         this.visualFeedback = visualFeedback;
     }
 
-    public String getTimerValue() {
-        return timerValue;
+    public int getTimerHour() {
+        return timerHour;
     }
+
+    public int getTimerMinute() { return timerMinute; }
 
     public boolean getHapticFeedback() {
         return hapticFeedback;

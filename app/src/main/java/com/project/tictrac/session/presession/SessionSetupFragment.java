@@ -1,6 +1,6 @@
 package com.project.tictrac.session.presession;
 
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.TimePicker;
 import android.widget.ToggleButton;
 
 import com.project.tictrac.R;
@@ -22,7 +22,7 @@ import com.project.tictrac.session.SessionActivityCallback;
 public class SessionSetupFragment extends Fragment {
 
     private SessionSetupViewModel mViewModel;
-    private EditText timerEditText;
+    private TimePicker timePicker;
     private ToggleButton hapticFeedbackToggleButton;
     private ToggleButton audioFeedbackToggleButton;
     private ToggleButton visualFeedbackToggleButton;
@@ -42,7 +42,7 @@ public class SessionSetupFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(SessionSetupViewModel.class);
+        mViewModel = new ViewModelProvider(this).get(SessionSetupViewModel.class);
 
         // Get UI elements, setup click listeners
         setupUI();
@@ -66,7 +66,7 @@ public class SessionSetupFragment extends Fragment {
      * This method sets up UI elements and click listeners, to be called in onActivityCreated
      */
     private void setupUI() {
-        timerEditText = getView().findViewById(R.id.timerEditText);
+        timePicker = getView().findViewById(R.id.timerPicker);
         hapticFeedbackToggleButton = getView().findViewById(R.id.hapticFeedbackToggleButton);
         audioFeedbackToggleButton = getView().findViewById(R.id.audioFeedbackToggleButton);
         visualFeedbackToggleButton = getView().findViewById(R.id.visualFeedbackToggleButton);
@@ -76,7 +76,8 @@ public class SessionSetupFragment extends Fragment {
         // and pass it back to the SessionActivity callback
         startSessionButton.setOnClickListener(v -> {
             SessionDetails details = new SessionDetails(
-                    timerEditText.getText().toString(),
+                    timePicker.getHour(),
+                    timePicker.getMinute(),
                     hapticFeedbackToggleButton.isChecked(),
                     audioFeedbackToggleButton.isChecked(),
                     visualFeedbackToggleButton.isChecked());
