@@ -23,12 +23,14 @@ import static androidx.core.content.ContextCompat.getSystemService;
 public class MotionEventListener extends AppCompatActivity implements SensorEventListener {
 
     private Context context;
+    private SessionViewModel mViewModel;
 
     //TODO: Allow for low, normal, and high sensitivity (threshold = 3,2,1)
     private static final int THRESHOLD = 2;
 
-    public MotionEventListener(Context context) {
+    public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;
+        this.mViewModel = mViewModel;
     }
 
     @Override
@@ -44,6 +46,7 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
 
         if (acceleration > THRESHOLD) {
             Utils.vibrate(500, context);
+            mViewModel.incrementMotionCounter();
         }
 
     }
