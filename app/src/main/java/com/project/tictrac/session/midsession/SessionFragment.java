@@ -2,37 +2,43 @@ package com.project.tictrac.session.midsession;
 
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.VibrationEffect;
+import android.os.CountDownTimer;
 import android.os.Vibrator;
-import android.provider.Telephony;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 import com.project.tictrac.session.presession.SessionDetails;
 
+import org.joda.time.DateTime;
+import org.joda.time.Hours;
+
 import java.io.File;
-import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.SENSOR_SERVICE;
-import static android.content.Context.VIBRATOR_SERVICE;
+import static java.lang.Math.abs;
 
 public class SessionFragment extends Fragment {
     final String LOG = "AudioRecorder";
@@ -48,11 +54,14 @@ public class SessionFragment extends Fragment {
 
     private SessionViewModel mViewModel;
     private SessionDetails sessionDetails;
-    private TextView testTextView;
+    private TextView timer;
+    private CountDownTimer countDownTimer;
+    private ProgressBar progressBar;
     private TextView motionCounter;
     private TextView audioCounter;
     private Button vibratorButton;
 
+    // nice.
     private Vibrator vibrator;
 
     //TODO: We aren't stopping the motion/audio listeners. Even if you go back to another activity,
@@ -73,9 +82,11 @@ public class SessionFragment extends Fragment {
         // View model setup
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
-        mViewModel = ViewModelProviders.of(this, factory).get(SessionViewModel.class);
+        mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
         // Get UI elements
+        timer = getView().findViewById(R.id.countdownTimer);
+        progressBar = getView().findViewById(R.id.progressBar);
         vibratorButton = getView().findViewById(R.id.vibratorButton);
         motionCounter = getView().findViewById(R.id.motionCounter);
         audioCounter = getView().findViewById(R.id.audioCounter);
@@ -119,11 +130,34 @@ public class SessionFragment extends Fragment {
         Bundle bundle = getArguments();
         assert bundle != null;
         sessionDetails = (SessionDetails) bundle.getSerializable("details");
+        progressBar.setProgress(100);
 
         // Extract info from SessionDetail object
         if (bundle.containsKey("details")) {
             sessionDetails = (SessionDetails) bundle.getSerializable("details");
-            System.out.println(sessionDetails.getTimerValue());
+            long hours = abs(sessionDetails.getTimerHour() - LocalDateTime.now().getHour());
+            long minutes = sessionDetails.getTimerMinute() - LocalDateTime.now().getMinute();
+
+            // referenced from https://developer.android.com/reference/android/os/CountDownTimer
+            // https://developer.android.com/reference/android/widget/ProgressBar
+            countDownTimer = new CountDownTimer(TimeUnit.HOURS.toMillis(hours) + TimeUnit.MINUTES.toMillis(minutes), TimeUnit.SECONDS.toMillis(1)) {
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    timer.setText(String.format("%s:%s",
+                            TimeUnit.MILLISECONDS.toHours(millisUntilFinished) % 24,
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60
+                            ));
+                    // TODO: How to just get this to start at either 0 or 100 and end at 0 or 100
+                    progressBar.setProgress((int) millisUntilFinished / 1000);
+                }
+
+                @Override
+                public void onFinish() {
+                    // TODO: Something here
+                    progressBar.setProgress(100);
+                }
+            }.start();
         }
 
         // Make phone vibrate for 1/2 second every time button clicked
