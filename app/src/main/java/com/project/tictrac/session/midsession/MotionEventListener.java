@@ -29,13 +29,7 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
     public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;
         this.mViewModel = mViewModel;
-        THRESHOLD = THRESHOLD_MED;
-    }
-
-    public MotionEventListener(Context context, SessionViewModel mViewModel, String sensitivity) {
-        this.context = context;
-        this.mViewModel = mViewModel;
-        setTHRESHOLD(sensitivity);
+        setTHRESHOLD(mViewModel.getMotionSensitivity());
     }
 
     @Override
