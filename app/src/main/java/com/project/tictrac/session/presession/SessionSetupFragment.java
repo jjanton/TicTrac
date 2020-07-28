@@ -30,10 +30,12 @@ public class SessionSetupFragment extends Fragment {
 
     private TextView ticNameTextView;
     private TextView timerTextView;
+    private ToggleButton motionSensorToggleButton;
+    private ToggleButton audioSensorToggleButton;
     private ToggleButton hapticFeedbackToggleButton;
     private ToggleButton audioFeedbackToggleButton;
-    private RadioGroup hapticRadioGroup;
-    private RadioGroup audioRadioGroup;
+    private RadioGroup motionSensorRadioGroup;
+    private RadioGroup audioSensorRadioGroup;
 
     public static SessionSetupFragment newInstance() {
         return new SessionSetupFragment();
@@ -74,10 +76,12 @@ public class SessionSetupFragment extends Fragment {
     private void setupUI() {
         timerTextView = getView().findViewById(R.id.timerTextView);
         ticNameTextView = getView().findViewById(R.id.ticNameTextView);
+        motionSensorToggleButton = getView().findViewById(R.id.motionSensorToggleButton);
+        audioSensorToggleButton = getView().findViewById(R.id.audioSensorToggleButton);
         hapticFeedbackToggleButton = getView().findViewById(R.id.hapticFeedbackToggleButton);
         audioFeedbackToggleButton = getView().findViewById(R.id.audioFeedbackToggleButton);
-        audioRadioGroup = getView().findViewById(R.id.audioRadioGroup);
-        hapticRadioGroup = getView().findViewById(R.id.hapticRadioGroup);
+        audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
+        motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
 
 
@@ -86,15 +90,15 @@ public class SessionSetupFragment extends Fragment {
         startSessionButton.setOnClickListener(v -> {
 
             // Referenced from https://stackoverflow.com/questions/18179124/android-getting-value-from-selected-radiobutton
-            int selectedHapticId = hapticRadioGroup.getCheckedRadioButtonId();
-            int selectedAudioId = audioRadioGroup.getCheckedRadioButtonId();
-            RadioButton hapticRadioButton = getView().findViewById(selectedHapticId);
-            RadioButton audioRadioButton = getView().findViewById(selectedAudioId);
+            int selectedMotionSensorId = motionSensorRadioGroup.getCheckedRadioButtonId();
+            int selectedAudioSensorId = audioSensorRadioGroup.getCheckedRadioButtonId();
+            RadioButton motionSensorRadioButton = getView().findViewById(selectedMotionSensorId);
+            RadioButton audioSensorRadioButton = getView().findViewById(selectedAudioSensorId);
 
             if (timerTextView.getText().toString().equals("")
                     || ticNameTextView.getText().toString().equals("")
-                    || selectedHapticId == -1
-                    || selectedAudioId == -1) {
+                    || selectedMotionSensorId == -1
+                    || selectedAudioSensorId == -1) {
 
                 Toast.makeText(getContext(), "FILL IN ALL FIELDS!",
                         Toast.LENGTH_SHORT).show();
@@ -104,10 +108,14 @@ public class SessionSetupFragment extends Fragment {
             SessionDetails details = new SessionDetails(
                     Integer.parseInt(timerTextView.getText().toString()),
                     ticNameTextView.getText().toString(),
+                    motionSensorToggleButton.isChecked(),
+                    audioSensorToggleButton.isChecked(),
+                    motionSensorRadioButton.getText().toString(),
+                    audioSensorRadioButton.getText().toString(),
                     hapticFeedbackToggleButton.isChecked(),
-                    audioFeedbackToggleButton.isChecked(),
-                    hapticRadioButton.getText().toString(),
-                    audioRadioButton.getText().toString());
+                    audioFeedbackToggleButton.isChecked()
+
+            );
 
             activityCallback.beginSessionButtonClicked(details);
         });

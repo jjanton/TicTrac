@@ -11,34 +11,46 @@ public class SessionDetails implements Serializable {
 
     private int timerValue;
     private String ticName;
-    private boolean hapticFeedback;
-    private boolean audioFeedback;
+    private boolean motionSensor;
+    private boolean audioSensor;
     private String motionSensitivity;
     private String audioSensitivity;
+    private boolean hapticFeedback;
+    private boolean audioFeedback;
 
-    public SessionDetails(int timerValue, String ticName, boolean hapticFeedback,
-                          boolean audioFeedback, String motionSensitivity, String audioSensitivity) {
+    public SessionDetails(int timerValue, String ticName, boolean motionSensor,
+                          boolean audioSensor, String motionSensitivity, String audioSensitivity,
+                          boolean hapticFeedback, boolean audioFeedback) {
         this.timerValue = timerValue;
         this.ticName = ticName;
-        this.hapticFeedback = hapticFeedback;
-        this.audioFeedback = audioFeedback;
+        this.motionSensor = motionSensor;
+        this.audioSensor = audioSensor;
         this.motionSensitivity = motionSensitivity;
         this.audioSensitivity = audioSensitivity;
+        this.hapticFeedback = hapticFeedback;
+        this.audioFeedback = audioFeedback;
     }
 
     public int getTimerValue() { return timerValue; }
 
     public String getTicName() { return ticName; }
 
-    public boolean getHapticFeedback() {
-        return hapticFeedback;
+    public boolean getMotionSensor() {
+        return motionSensor;
     }
 
-    public boolean getAudioFeedback() {
-        return audioFeedback;
+    public boolean getAudioSensor() {
+        return audioSensor;
     }
 
     public String getMotionSensitivity() { return motionSensitivity; }
 
     public String getAudioSensitivity() { return audioSensitivity; }
+
+    public boolean getHapticFeedback() { return hapticFeedback; }
+
+    public boolean getAudioFeedback() {
+        return audioFeedback;
+    }
+
 }

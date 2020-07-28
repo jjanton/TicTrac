@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 
 /**
@@ -20,11 +21,21 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
     private SessionViewModel mViewModel;
 
     //TODO: Allow for low, normal, and high sensitivity (threshold = 3,2,1)
-    private static final int THRESHOLD = 3;
+    private static final double THRESHOLD_LOW = 1.5;
+    private static final double THRESHOLD_MED = 2.5;
+    private static final double THRESHOLD_HIGH = 4;
+    private static double THRESHOLD;
 
     public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;
         this.mViewModel = mViewModel;
+        THRESHOLD = THRESHOLD_MED;
+    }
+
+    public MotionEventListener(Context context, SessionViewModel mViewModel, String sensitivity) {
+        this.context = context;
+        this.mViewModel = mViewModel;
+        setTHRESHOLD(sensitivity);
     }
 
     @Override
@@ -50,5 +61,18 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
         // No implementation
     }
 
+    public void setTHRESHOLD(String sensitivity) {
+        // Low sensitivity = High threshold, High sensitivity = Low threshold
+        switch (sensitivity) {
+            case "Low":
+                THRESHOLD = THRESHOLD_HIGH;
+                break;
+            case "High":
+                THRESHOLD = THRESHOLD_LOW;
+                break;
+            default:
+                THRESHOLD = THRESHOLD_MED;
+        }
+    }
 
 }
