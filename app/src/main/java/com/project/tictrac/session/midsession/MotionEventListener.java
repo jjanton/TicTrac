@@ -4,16 +4,10 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.project.tictrac.Utils;
-
-import static android.content.Context.VIBRATOR_SERVICE;
-import static androidx.core.content.ContextCompat.createDeviceProtectedStorageContext;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 /**
  * This class and its required methods, onSensorChanged, and onAccuracyChanged, were
@@ -26,7 +20,7 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
     private SessionViewModel mViewModel;
 
     //TODO: Allow for low, normal, and high sensitivity (threshold = 3,2,1)
-    private static final int THRESHOLD = 2;
+    private static final int THRESHOLD = 3;
 
     public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;

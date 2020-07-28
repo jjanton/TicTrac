@@ -13,7 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TimePicker;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.project.tictrac.R;
@@ -22,12 +25,15 @@ import com.project.tictrac.session.SessionActivityCallback;
 public class SessionSetupFragment extends Fragment {
 
     private SessionSetupViewModel mViewModel;
-    private TimePicker timePicker;
-    private ToggleButton hapticFeedbackToggleButton;
-    private ToggleButton audioFeedbackToggleButton;
-    private ToggleButton visualFeedbackToggleButton;
     private Button startSessionButton;
     private SessionActivityCallback activityCallback;
+
+    private TextView ticNameTextView;
+    private TextView timerTextView;
+    private ToggleButton hapticFeedbackToggleButton;
+    private ToggleButton audioFeedbackToggleButton;
+    private RadioGroup hapticRadioGroup;
+    private RadioGroup audioRadioGroup;
 
     public static SessionSetupFragment newInstance() {
         return new SessionSetupFragment();
@@ -66,21 +72,43 @@ public class SessionSetupFragment extends Fragment {
      * This method sets up UI elements and click listeners, to be called in onActivityCreated
      */
     private void setupUI() {
-        timePicker = getView().findViewById(R.id.timerPicker);
+        timerTextView = getView().findViewById(R.id.timerTextView);
+        ticNameTextView = getView().findViewById(R.id.ticNameTextView);
         hapticFeedbackToggleButton = getView().findViewById(R.id.hapticFeedbackToggleButton);
         audioFeedbackToggleButton = getView().findViewById(R.id.audioFeedbackToggleButton);
-        visualFeedbackToggleButton = getView().findViewById(R.id.visualFeedbackToggleButton);
+        audioRadioGroup = getView().findViewById(R.id.audioRadioGroup);
+        hapticRadioGroup = getView().findViewById(R.id.hapticRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
+
 
         // Set click listener for startSessionButton. Build a SessionDetails object,
         // and pass it back to the SessionActivity callback
         startSessionButton.setOnClickListener(v -> {
+
+            // Referenced from https://stackoverflow.com/questions/18179124/android-getting-value-from-selected-radiobutton
+            int selectedHapticId = hapticRadioGroup.getCheckedRadioButtonId();
+            int selectedAudioId = audioRadioGroup.getCheckedRadioButtonId();
+            RadioButton hapticRadioButton = getView().findViewById(selectedHapticId);
+            RadioButton audioRadioButton = getView().findViewById(selectedAudioId);
+
+            if (timerTextView.getText().toString().equals("")
+                    || ticNameTextView.getText().toString().equals("")
+                    || selectedHapticId == -1
+                    || selectedAudioId == -1) {
+
+                Toast.makeText(getContext(), "FILL IN ALL FIELDS!",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             SessionDetails details = new SessionDetails(
-                    timePicker.getHour(),
-                    timePicker.getMinute(),
+                    Integer.parseInt(timerTextView.getText().toString()),
+                    ticNameTextView.getText().toString(),
                     hapticFeedbackToggleButton.isChecked(),
                     audioFeedbackToggleButton.isChecked(),
-                    visualFeedbackToggleButton.isChecked());
+                    hapticRadioButton.getText().toString(),
+                    audioRadioButton.getText().toString());
+
             activityCallback.beginSessionButtonClicked(details);
         });
     }

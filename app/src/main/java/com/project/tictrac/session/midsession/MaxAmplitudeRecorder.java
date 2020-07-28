@@ -85,7 +85,7 @@ public class MaxAmplitudeRecorder {
      * https://developer.android.com/guide/topics/media/mediarecorder
      */
     public void stopRecording() {
-        mediaRecorder.stop();
+        continueRecording = false;
         mediaRecorder.release();
     }
 

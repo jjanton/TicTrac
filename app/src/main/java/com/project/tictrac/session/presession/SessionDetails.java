@@ -9,26 +9,26 @@ import java.io.Serializable;
  */
 public class SessionDetails implements Serializable {
 
-    private int timerHour;
-    private int timerMinute;
+    private int timerValue;
+    private String ticName;
     private boolean hapticFeedback;
     private boolean audioFeedback;
-    private boolean visualFeedback;
+    private String motionSensitivity;
+    private String audioSensitivity;
 
-    public SessionDetails(int timerHour, int timerMinute, boolean hapticFeedback, boolean audioFeedback,
-                          boolean visualFeedback) {
-        this.timerHour = timerHour;
-        this.timerMinute = timerMinute;
+    public SessionDetails(int timerValue, String ticName, boolean hapticFeedback,
+                          boolean audioFeedback, String motionSensitivity, String audioSensitivity) {
+        this.timerValue = timerValue;
+        this.ticName = ticName;
         this.hapticFeedback = hapticFeedback;
         this.audioFeedback = audioFeedback;
-        this.visualFeedback = visualFeedback;
+        this.motionSensitivity = motionSensitivity;
+        this.audioSensitivity = audioSensitivity;
     }
 
-    public int getTimerHour() {
-        return timerHour;
-    }
+    public int getTimerValue() { return timerValue; }
 
-    public int getTimerMinute() { return timerMinute; }
+    public String getTicName() { return ticName; }
 
     public boolean getHapticFeedback() {
         return hapticFeedback;
@@ -38,8 +38,7 @@ public class SessionDetails implements Serializable {
         return audioFeedback;
     }
 
-    public boolean getVisualFeedback() {
-        return visualFeedback;
-    }
+    public String getMotionSensitivity() { return motionSensitivity; }
 
+    public String getAudioSensitivity() { return audioSensitivity; }
 }
