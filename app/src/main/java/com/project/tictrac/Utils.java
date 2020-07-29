@@ -3,6 +3,8 @@ package com.project.tictrac;
 import android.content.Context;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.view.View;
+import android.widget.RadioGroup;
 
 import static android.content.Context.VIBRATOR_SERVICE;
 
@@ -16,6 +18,15 @@ public class Utils {
     public static void vibrate(int duration, Context context) {
         ((Vibrator) context.getSystemService(VIBRATOR_SERVICE)).vibrate(
                 VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE));
+    }
+
+    public static void setRadioGroup(RadioGroup radioGroup, boolean enabled) {
+        for (int i = 0; i < radioGroup.getChildCount(); i++) {
+            radioGroup.getChildAt(i).setClickable(enabled);
+
+            int visible = enabled ? View.VISIBLE : View.INVISIBLE;
+            radioGroup.getChildAt(i).setVisibility(visible);
+        }
     }
 
 }

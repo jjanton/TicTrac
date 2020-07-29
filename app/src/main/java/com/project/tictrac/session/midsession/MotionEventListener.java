@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.os.Handler;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,16 +20,17 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
 
     private Context context;
     private SessionViewModel mViewModel;
+    private Handler mViewModelHandler;
 
-    //TODO: Allow for low, normal, and high sensitivity (threshold = 3,2,1)
-    private static final double THRESHOLD_LOW = 1.5;
-    private static final double THRESHOLD_MED = 2.5;
+    private static final double THRESHOLD_LOW = 2.2;
+    private static final double THRESHOLD_MED = 3;
     private static final double THRESHOLD_HIGH = 4;
     private static double THRESHOLD;
 
     public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;
         this.mViewModel = mViewModel;
+        mViewModelHandler = new Handler();
         setTHRESHOLD(mViewModel.getMotionSensitivity());
     }
 
@@ -44,8 +46,13 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
         double acceleration = Math.sqrt(sumOfSquares);
 
         if (acceleration > THRESHOLD) {
-            Utils.vibrate(500, context);
-            mViewModel.incrementMotionCounter();
+            if (mViewModel.isHapticFeedbackEnabled()) {
+                Utils.vibrate(500, context);
+            }
+
+            mViewModelHandler.post(() -> {
+                mViewModel.incrementMotionCounter();
+            });
         }
 
     }

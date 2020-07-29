@@ -15,36 +15,30 @@ import java.io.IOException;
  * and the example code that comes with the book, Class MaxAmplitudeRecorder
  */
 public class MaxAmplitudeRecorder {
-    // Constructor arguments
-    private int amplitudeThreshold;
     private String tmpAudioFile;
     private Context context;
     private SessionViewModel mViewModel;
 
     // Audio variables
-    private AmplitudeClipListener clipListener;
     private MediaRecorder mediaRecorder;
     private boolean continueRecording;
 
-    private static final int THRESHOLD_LOW = 10000;
-    private static final int THRESHOLD_MED = 18000;
-    private static final int THRESHOLD_HIGH = 25000;
+    private static final int THRESHOLD_LOW = 6000;
+    private static final int THRESHOLD_MED = 10000;
+    private static final int THRESHOLD_HIGH = 20000;
     private static double THRESHOLD;
 
     private Handler mViewModelHandler;
 
-    public MaxAmplitudeRecorder(int amplitudeThreshold, String tmpAudioFile, Context context, SessionViewModel mViewModel) {
-        this.amplitudeThreshold = amplitudeThreshold;
+    public MaxAmplitudeRecorder(String tmpAudioFile, Context context, SessionViewModel mViewModel) {
         this.tmpAudioFile = tmpAudioFile;
         this.context = context;
         this.mViewModel = mViewModel;
-        THRESHOLD = THRESHOLD_MED;
-
-        this.continueRecording = false;
-        this.clipListener = createAmplitudeClipListener(amplitudeThreshold);
 
         mViewModelHandler = new Handler();
         setTHRESHOLD(mViewModel.getAudioSensitivity());
+
+        this.continueRecording = false;
     }
 
 
@@ -53,17 +47,17 @@ public class MaxAmplitudeRecorder {
      */
     public void startRecording()  {
         prepareMediaRecorder();
-
-        boolean heard = false;
         continueRecording = true;
         mediaRecorder.getMaxAmplitude();
 
         while (continueRecording) {
             int maxAmplitude = mediaRecorder.getMaxAmplitude();
-            heard = clipListener.heard(maxAmplitude);
+            System.out.println(maxAmplitude);
 
-            if (heard) {
-                Utils.vibrate(1000, context);
+            if (maxAmplitude >= THRESHOLD) {
+                if (mViewModel.isHapticFeedbackEnabled()) {
+                    Utils.vibrate(1000, context);
+                }
 
                 mViewModelHandler.post(() -> {
                     mViewModel.incrementAudioCounter();
@@ -104,7 +98,6 @@ public class MaxAmplitudeRecorder {
         }
     }
 
-
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
      */
@@ -128,18 +121,14 @@ public class MaxAmplitudeRecorder {
     }
 
 
-    private AmplitudeClipListener createAmplitudeClipListener(int amplitudeThreshold) {
-
-        return new AmplitudeClipListener() {
-            @Override
-            public boolean heard(int maxAmplitude) {
-                return maxAmplitude >= amplitudeThreshold;
-            }
-        };
-    }
-
-    public double getTHRESHOLD() {
-        return THRESHOLD;
-    }
+//    private AmplitudeClipListener createAmplitudeClipListener(double amplitudeThreshold) {
+//
+//        return new AmplitudeClipListener() {
+//            @Override
+//            public boolean heard(int maxAmplitude) {
+//                return maxAmplitude >= amplitudeThreshold;
+//            }
+//        };
+//    }
 
 }

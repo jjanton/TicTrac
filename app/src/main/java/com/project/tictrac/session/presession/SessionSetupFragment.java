@@ -20,6 +20,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.project.tictrac.R;
+import com.project.tictrac.Utils;
 import com.project.tictrac.session.SessionActivityCallback;
 
 public class SessionSetupFragment extends Fragment {
@@ -84,6 +85,32 @@ public class SessionSetupFragment extends Fragment {
         motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
 
+        Utils.setRadioGroup(motionSensorRadioGroup, false);
+        Utils.setRadioGroup(audioSensorRadioGroup, false);
+
+        motionSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (motionSensorToggleButton.isChecked()) {
+                    Utils.setRadioGroup(motionSensorRadioGroup,true);
+                } else {
+                    Utils.setRadioGroup(motionSensorRadioGroup,false);
+                }
+            }
+        });
+
+        // Listener for audioSensor toggle
+        audioSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (audioSensorToggleButton.isChecked()) {
+                    Utils.setRadioGroup(audioSensorRadioGroup,true);
+                } else {
+                    Utils.setRadioGroup(audioSensorRadioGroup,false);
+                }
+            }
+        });
+
 
         // Set click listener for startSessionButton. Build a SessionDetails object,
         // and pass it back to the SessionActivity callback
@@ -96,25 +123,21 @@ public class SessionSetupFragment extends Fragment {
             RadioButton audioSensorRadioButton = getView().findViewById(selectedAudioSensorId);
 
             if (timerTextView.getText().toString().equals("")
-                    || ticNameTextView.getText().toString().equals("")
-                    || selectedMotionSensorId == -1
-                    || selectedAudioSensorId == -1) {
-
-                Toast.makeText(getContext(), "FILL IN ALL FIELDS!",
+                    || ticNameTextView.getText().toString().equals("")) {
+                Toast.makeText(getContext(), "Enter a tic name and a timer value!",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            SessionDetails details = new SessionDetails(
+                    SessionDetails details = new SessionDetails(
                     Integer.parseInt(timerTextView.getText().toString()),
                     ticNameTextView.getText().toString(),
                     motionSensorToggleButton.isChecked(),
                     audioSensorToggleButton.isChecked(),
-                    motionSensorRadioButton.getText().toString(),
-                    audioSensorRadioButton.getText().toString(),
+                    motionSensorRadioButton == null ? "Medium" : motionSensorRadioButton.getText().toString(),
+                    audioSensorRadioButton == null ? "Medium" : audioSensorRadioButton.getText().toString(),
                     hapticFeedbackToggleButton.isChecked(),
                     audioFeedbackToggleButton.isChecked()
-
             );
 
             activityCallback.beginSessionButtonClicked(details);
