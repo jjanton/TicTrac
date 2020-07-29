@@ -36,23 +36,25 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        float[] xyzValues = event.values.clone();
+        if (mViewModel.isMotionSensorEnabled()) {
+            float[] xyzValues = event.values.clone();
 
-        double sumOfSquares =
-                (xyzValues[0] * xyzValues[0])
-                        + (xyzValues[1] * xyzValues[1])
-                        + (xyzValues[2] * xyzValues[2]);
+            double sumOfSquares =
+                    (xyzValues[0] * xyzValues[0])
+                            + (xyzValues[1] * xyzValues[1])
+                            + (xyzValues[2] * xyzValues[2]);
 
-        double acceleration = Math.sqrt(sumOfSquares);
+            double acceleration = Math.sqrt(sumOfSquares);
 
-        if (acceleration > THRESHOLD) {
-            if (mViewModel.isHapticFeedbackEnabled()) {
-                Utils.vibrate(500, context);
+            if (acceleration > THRESHOLD)  {
+                if (mViewModel.isHapticFeedbackEnabled()) {
+                    Utils.vibrate(500, context);
+                }
+
+                mViewModelHandler.post(() -> {
+                    mViewModel.incrementMotionCounter();
+                });
             }
-
-            mViewModelHandler.post(() -> {
-                mViewModel.incrementMotionCounter();
-            });
         }
 
     }
@@ -75,5 +77,6 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
                 THRESHOLD = THRESHOLD_MED;
         }
     }
+
 
 }

@@ -1,5 +1,8 @@
 package com.project.tictrac.session.midsession;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -7,24 +10,32 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 import com.project.tictrac.session.presession.SessionDetails;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.SENSOR_SERVICE;
@@ -53,9 +64,48 @@ public class SessionFragment extends Fragment {
     private ToggleButton hapticFeedbackToggleButton2;
     private ToggleButton audioFeedbackToggleButton2;
 
+    private boolean motionSensorPreviouslyEnabled = false;
+    private boolean audioSensorPreviouslyEnabled = false;
+
+
     public static SessionFragment newInstance() {
         return new SessionFragment();
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mViewModel.isMotionSensorEnabled()) {
+            mViewModel.setMotionSensorEnabled(false);
+            motionSensorPreviouslyEnabled = true;
+            stopReadingMotionData();
+        }
+
+        if (mViewModel.isAudioSensorEnabled()) {
+            mViewModel.setAudioSensorEnabled(false);
+            audioSensorPreviouslyEnabled = true;
+            stopReadingAudioData();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (motionSensorPreviouslyEnabled) {
+            mViewModel.setMotionSensorEnabled(true);
+            motionSensorPreviouslyEnabled = false;
+            startReadingMotionData();
+        }
+
+        if (audioSensorPreviouslyEnabled) {
+            mViewModel.setAudioSensorEnabled(true);
+            audioSensorPreviouslyEnabled = false;
+            startReadingAudioData();
+        }
+    }
+
+
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -66,6 +116,16 @@ public class SessionFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        // referenced (in part) from https://stackoverflow.com/questions/56319759/how-to-show-warning-message-when-back-button-is-pressed-in-fragments
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                displayNewLinkPopup(getContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
+
 
         sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
 
@@ -257,8 +317,11 @@ public class SessionFragment extends Fragment {
         mViewModel.setMotionSensorEnabled(true);
 
         motionEventListener = new MotionEventListener(getContext(), mViewModel);
+
         RunnableThread runnableThread = new RunnableThread(motionEventListener, sensorManager);
         new Thread(runnableThread).start();
+
+
     }
 
     private void setMotionSensorSensitivity(String sensitivity) {
@@ -275,6 +338,7 @@ public class SessionFragment extends Fragment {
     private void stopReadingMotionData() {
         sensorManager.unregisterListener(motionEventListener);
         mViewModel.setMotionSensorEnabled(false);
+        motionEventListener = null;
     }
 
     /**
@@ -330,6 +394,37 @@ public class SessionFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         }.start();
+    }
+
+    private void pauseTimer() {
+        countDownTimer.cancel();
+    }
+
+    private void resumeTimer() {
+
+    }
+
+    // Referenced (in part) from: https://www.sitepoint.com/starting-android-development-creating-todo-app/
+    private void displayNewLinkPopup(Context context) {
+        AlertDialog popup = new AlertDialog.Builder(context)
+                .setTitle("Warning")
+                .setMessage("Any changes will not be saved. Are you sure?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Go Back", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        stopReadingAudioData();
+                        stopReadingMotionData();
+
+//                        android.app.Fragment current = getActivity().getFragmentManager().findFragmentById(R.id.SecondFragment);
+//                        requireActivity().getSupportFragmentManager().popBackStack(getParentFragment().getId(),FragmentManager.POP_BACK_STACK_INCLUSIVE);
+//                        requireActivity().getSupportFragmentManager().popBackStack();
+
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                    }
+                })
+                .create();
+        popup.show();
     }
 
 }

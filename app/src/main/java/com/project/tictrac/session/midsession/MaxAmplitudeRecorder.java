@@ -19,7 +19,6 @@ public class MaxAmplitudeRecorder {
     private Context context;
     private SessionViewModel mViewModel;
 
-    // Audio variables
     private MediaRecorder mediaRecorder;
     private boolean continueRecording;
 
@@ -40,7 +39,6 @@ public class MaxAmplitudeRecorder {
 
         this.continueRecording = false;
     }
-
 
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
@@ -79,10 +77,6 @@ public class MaxAmplitudeRecorder {
      * This method was referenced from Google documentation on MediaRecorder,
      * https://developer.android.com/guide/topics/media/mediarecorder
      */
-    public void stopRecording() {
-        continueRecording = false;
-        mediaRecorder.release();
-    }
 
     public void setTHRESHOLD(String sensitivity) {
         // Low sensitivity = High threshold, High sensitivity = Low threshold
@@ -120,15 +114,9 @@ public class MaxAmplitudeRecorder {
         mediaRecorder.start();
     }
 
-
-//    private AmplitudeClipListener createAmplitudeClipListener(double amplitudeThreshold) {
-//
-//        return new AmplitudeClipListener() {
-//            @Override
-//            public boolean heard(int maxAmplitude) {
-//                return maxAmplitude >= amplitudeThreshold;
-//            }
-//        };
-//    }
+    public void stopRecording() {
+        continueRecording = false;
+        mediaRecorder.release();
+    }
 
 }

@@ -71,6 +71,12 @@ public class SessionSetupFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        clearAllSettings();
+    }
+
     /**
      * This method sets up UI elements and click listeners, to be called in onActivityCreated
      */
@@ -142,6 +148,19 @@ public class SessionSetupFragment extends Fragment {
 
             activityCallback.beginSessionButtonClicked(details);
         });
+    }
+
+    private void clearAllSettings() {
+        ticNameTextView.setText(null);
+        timerTextView.setText(null);
+        motionSensorToggleButton.setChecked(false);
+        audioSensorToggleButton.setChecked(false);
+        hapticFeedbackToggleButton.setChecked(false);
+        audioFeedbackToggleButton.setChecked(false);
+        Utils.setRadioGroup(motionSensorRadioGroup,false);
+        Utils.setRadioGroup(audioSensorRadioGroup,false);
+        motionSensorRadioGroup.clearCheck();
+        audioSensorRadioGroup.clearCheck();
     }
 
 }
