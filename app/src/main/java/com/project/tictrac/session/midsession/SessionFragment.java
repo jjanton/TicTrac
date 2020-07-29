@@ -73,6 +73,12 @@ public class SessionFragment extends Fragment {
     }
 
     @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.session_fragment, container, false);
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 
@@ -105,32 +111,36 @@ public class SessionFragment extends Fragment {
         }
     }
 
-
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.session_fragment, container, false);
-    }
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // referenced (in part) from https://stackoverflow.com/questions/56319759/how-to-show-warning-message-when-back-button-is-pressed-in-fragments
-        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                displayNewLinkPopup(getContext());
-            }
-        };
-        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
+        setupUI();
+        setButtonListeners();
+        initializeUIState();
+        createCountDownTimer();
+    }
 
+    private void setupUI() {
+        // View model setup
+        SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
+                getActivity().getApplication(), this);
+        mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
         sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
 
-        // Setup user interface
-        setupUI();
+        // Get UI elements
+        countdownTimerTextView = getView().findViewById(R.id.countdownTimerTextView);
+        motionCounter = getView().findViewById(R.id.motionCounter);
+        audioCounter = getView().findViewById(R.id.audioCounter);
+        motionSensorToggleButton2 = getView().findViewById(R.id.motionSensorToggleButton2);
+        audioSensorToggleButton2 = getView().findViewById(R.id.audioSensorToggleButton2);
+        motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
+        audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
+        hapticFeedbackToggleButton2 = getView().findViewById(R.id.hapticFeedbackToggleButton2);
+        audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
+        motionCounter.setText("Motion Counter: 0");
+        audioCounter.setText("Audio Counter: 0");
 
         // Get get the SessionDetail object that was set as this fragment's arguments
         Bundle bundle = getArguments();
@@ -153,29 +163,6 @@ public class SessionFragment extends Fragment {
             mViewModel.setAudioSensitivity(sessionDetails.getAudioSensitivity());
         }
 
-        initializeUIState();
-        createCountDownTimer();
-    }
-
-    private void setupUI() {
-        // View model setup
-        SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
-                getActivity().getApplication(), this);
-        mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
-
-        // Get UI elements
-        countdownTimerTextView = getView().findViewById(R.id.countdownTimerTextView);
-        motionCounter = getView().findViewById(R.id.motionCounter);
-        audioCounter = getView().findViewById(R.id.audioCounter);
-        motionSensorToggleButton2 = getView().findViewById(R.id.motionSensorToggleButton2);
-        audioSensorToggleButton2 = getView().findViewById(R.id.audioSensorToggleButton2);
-        motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
-        audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
-        hapticFeedbackToggleButton2 = getView().findViewById(R.id.hapticFeedbackToggleButton2);
-        audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
-        motionCounter.setText("Motion Counter: 0");
-        audioCounter.setText("Audio Counter: 0");
-
         // Observer for motionCounter
         final Observer<Integer> motionCounterObserver = new Observer<Integer>() {
             @Override
@@ -191,11 +178,22 @@ public class SessionFragment extends Fragment {
                 audioCounter.setText("Audio Counter: " + String.valueOf(integer));
             }
         };
-
         // Tell observers to observe the data in mViewModel
         mViewModel.getMotionCounter().observe(getViewLifecycleOwner(), motionCounterObserver);
         mViewModel.getAudioCounter().observe(getViewLifecycleOwner(), audioCounterObserver);
 
+        // referenced (in part) from https://stackoverflow.com/questions/56319759/how-to-show-warning-message-when-back-button-is-pressed-in-fragments
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                displayNewLinkPopup(getContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
+
+    }
+
+    private void setButtonListeners() {
         // Listener for motionSensor toggle
         motionSensorToggleButton2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -259,7 +257,6 @@ public class SessionFragment extends Fragment {
                 mViewModel.setAudioFeedbackEnabled(audioFeedbackToggleButton2.isChecked());
             }
         });
-
     }
 
     private void initializeUIState() {
@@ -415,11 +412,6 @@ public class SessionFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         stopReadingAudioData();
                         stopReadingMotionData();
-
-//                        android.app.Fragment current = getActivity().getFragmentManager().findFragmentById(R.id.SecondFragment);
-//                        requireActivity().getSupportFragmentManager().popBackStack(getParentFragment().getId(),FragmentManager.POP_BACK_STACK_INCLUSIVE);
-//                        requireActivity().getSupportFragmentManager().popBackStack();
-
                         requireActivity().getSupportFragmentManager().popBackStack();
                     }
                 })

@@ -98,9 +98,9 @@ public class SessionSetupFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (motionSensorToggleButton.isChecked()) {
-                    Utils.setRadioGroup(motionSensorRadioGroup,true);
+                    Utils.setRadioGroup(motionSensorRadioGroup, true);
                 } else {
-                    Utils.setRadioGroup(motionSensorRadioGroup,false);
+                    Utils.setRadioGroup(motionSensorRadioGroup, false);
                 }
             }
         });
@@ -110,13 +110,12 @@ public class SessionSetupFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (audioSensorToggleButton.isChecked()) {
-                    Utils.setRadioGroup(audioSensorRadioGroup,true);
+                    Utils.setRadioGroup(audioSensorRadioGroup, true);
                 } else {
-                    Utils.setRadioGroup(audioSensorRadioGroup,false);
+                    Utils.setRadioGroup(audioSensorRadioGroup, false);
                 }
             }
         });
-
 
         // Set click listener for startSessionButton. Build a SessionDetails object,
         // and pass it back to the SessionActivity callback
@@ -128,14 +127,17 @@ public class SessionSetupFragment extends Fragment {
             RadioButton motionSensorRadioButton = getView().findViewById(selectedMotionSensorId);
             RadioButton audioSensorRadioButton = getView().findViewById(selectedAudioSensorId);
 
+            // Have to enter a timer value, timer value needs to be at least 1 minute,
+            // have to enter a tic name
             if (timerTextView.getText().toString().equals("")
+                    || Integer.parseInt(timerTextView.getText().toString()) < 1
                     || ticNameTextView.getText().toString().equals("")) {
-                Toast.makeText(getContext(), "Enter a tic name and a timer value!",
+                Toast.makeText(getContext(), "Enter a tic name and a timer value of at least 1 minute!",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
 
-                    SessionDetails details = new SessionDetails(
+            SessionDetails details = new SessionDetails(
                     Integer.parseInt(timerTextView.getText().toString()),
                     ticNameTextView.getText().toString(),
                     motionSensorToggleButton.isChecked(),
@@ -157,8 +159,8 @@ public class SessionSetupFragment extends Fragment {
         audioSensorToggleButton.setChecked(false);
         hapticFeedbackToggleButton.setChecked(false);
         audioFeedbackToggleButton.setChecked(false);
-        Utils.setRadioGroup(motionSensorRadioGroup,false);
-        Utils.setRadioGroup(audioSensorRadioGroup,false);
+        Utils.setRadioGroup(motionSensorRadioGroup, false);
+        Utils.setRadioGroup(audioSensorRadioGroup, false);
         motionSensorRadioGroup.clearCheck();
         audioSensorRadioGroup.clearCheck();
     }
