@@ -179,4 +179,29 @@
         app:layout_constraintStart_toEndOf="@+id/hapticFeedbackToggleButton2"
         app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton2" />
 
+    <ImageButton
+        android:id="@+id/imageButton"
+        android:layout_width="132dp"
+        android:layout_height="129dp"
+        android:src="@drawable/ic_pause_circle_outline_24"
+        android:background="@color/material_on_background_disabled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imageButton2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/hapticFeedbackToggleButton2" />
+
+    <ImageButton
+        android:id="@+id/imageButton2"
+        android:layout_width="127dp"
+        android:layout_height="128dp"
+        android:src="@drawable/ic_baseline_cancel_24"
+        android:background="@color/material_on_background_disabled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/imageButton"
+        app:layout_constraintTop_toBottomOf="@+id/audioFeedbackToggleButton2" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
