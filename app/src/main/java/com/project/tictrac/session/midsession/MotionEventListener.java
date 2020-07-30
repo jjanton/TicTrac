@@ -4,16 +4,11 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.project.tictrac.R;
 import com.project.tictrac.Utils;
-
-import static android.content.Context.VIBRATOR_SERVICE;
-import static androidx.core.content.ContextCompat.createDeviceProtectedStorageContext;
-import static androidx.core.content.ContextCompat.getSystemService;
 
 /**
  * This class and its required methods, onSensorChanged, and onAccuracyChanged, were
@@ -26,11 +21,15 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
     private SessionViewModel mViewModel;
 
     //TODO: Allow for low, normal, and high sensitivity (threshold = 3,2,1)
-    private static final int THRESHOLD = 2;
+    private static final double THRESHOLD_LOW = 1.5;
+    private static final double THRESHOLD_MED = 2.5;
+    private static final double THRESHOLD_HIGH = 4;
+    private static double THRESHOLD;
 
     public MotionEventListener(Context context, SessionViewModel mViewModel) {
         this.context = context;
         this.mViewModel = mViewModel;
+        setTHRESHOLD(mViewModel.getMotionSensitivity());
     }
 
     @Override
@@ -56,5 +55,18 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
         // No implementation
     }
 
+    public void setTHRESHOLD(String sensitivity) {
+        // Low sensitivity = High threshold, High sensitivity = Low threshold
+        switch (sensitivity) {
+            case "Low":
+                THRESHOLD = THRESHOLD_HIGH;
+                break;
+            case "High":
+                THRESHOLD = THRESHOLD_LOW;
+                break;
+            default:
+                THRESHOLD = THRESHOLD_MED;
+        }
+    }
 
 }

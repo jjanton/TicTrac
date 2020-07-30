@@ -7,18 +7,26 @@ public class SessionViewModel extends ViewModel {
     private MutableLiveData<Integer> motionCounter = new MutableLiveData<>();
     private MutableLiveData<Integer> audioCounter = new MutableLiveData<>();
 
+    private int timerValue;
+    private String ticName;
+
+    private boolean motionSensorEnabled;
+    private boolean audioSensorEnabled;
+
+    private boolean hapticFeedbackEnabled;
+    private boolean audioFeedbackEnabled;
+
+    private String motionSensitivity;
+    private String audioSensitivity;
+
     public SessionViewModel() {
         motionCounter.setValue(0);
-        motionCounter.setValue(0);
+        audioCounter.setValue(0);
     }
 
-    public MutableLiveData<Integer> getMotionCounter() {
-        return motionCounter;
-    }
+    public MutableLiveData<Integer> getMotionCounter() { return motionCounter; }
 
-    public MutableLiveData<Integer> getAudioCounter() {
-        return audioCounter;
-    }
+    public MutableLiveData<Integer> getAudioCounter() { return audioCounter; }
 
     void incrementMotionCounter () {
         Integer newValue = (motionCounter.getValue() == null) ? 0 : motionCounter.getValue() + 1;
@@ -30,23 +38,53 @@ public class SessionViewModel extends ViewModel {
         audioCounter.setValue(newValue);
     }
 
-    public int getMotionCounterValue() {
-        if (motionCounter == null) {
-            return 0;
-        } else {
-            return (int) motionCounter.getValue();
-        }
-    }
+    public int getTimerValue() { return timerValue; }
 
-    public int getAudioCounterValue() {
-        if (audioCounter == null) {
-            return 0;
-        } else {
-            return (int) audioCounter.getValue();
-        }
-    }
+    public void setTimerValue(int timerValue) { this.timerValue = timerValue; }
+
+    public String getTicName() { return ticName; }
+
+    public void setTicName(String ticName) { this.ticName = ticName; }
+
+    public boolean isMotionSensorEnabled() { return motionSensorEnabled; }
+
+    public void setMotionSensorEnabled(boolean motionSensorEnabled) { this.motionSensorEnabled = motionSensorEnabled; }
+
+    public boolean isAudioSensorEnabled() { return audioSensorEnabled; }
+
+    public void setAudioSensorEnabled(boolean audioSensorEnabled) { this.audioSensorEnabled = audioSensorEnabled; }
+
+    public boolean isHapticFeedbackEnabled() { return hapticFeedbackEnabled; }
+
+    public void setHapticFeedbackEnabled(boolean hapticFeedbackEnabled) { this.hapticFeedbackEnabled = hapticFeedbackEnabled; }
+
+    public boolean isAudioFeedbackEnabled() { return audioFeedbackEnabled; }
+
+    public void setAudioFeedbackEnabled(boolean audioFeedbackEnabled) { this.audioFeedbackEnabled = audioFeedbackEnabled; }
+
+    public String getMotionSensitivity() { return motionSensitivity; }
+
+    public void setMotionSensitivity(String motionSensitivity) { this.motionSensitivity = motionSensitivity; }
+
+    public String getAudioSensitivity() { return audioSensitivity; }
+
+    public void setAudioSensitivity(String audioSensitivity) { this.audioSensitivity = audioSensitivity; }
 
 
-
+//    public int getMotionCounterValue() {
+//        if (motionCounter == null) {
+//            return 0;
+//        } else {
+//            return (int) motionCounter.getValue();
+//        }
+//    }
+//
+//    public int getAudioCounterValue() {
+//        if (audioCounter == null) {
+//            return 0;
+//        } else {
+//            return (int) audioCounter.getValue();
+//        }
+//    }
 
 }

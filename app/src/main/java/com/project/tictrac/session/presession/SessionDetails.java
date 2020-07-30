@@ -9,37 +9,48 @@ import java.io.Serializable;
  */
 public class SessionDetails implements Serializable {
 
-    private int timerHour;
-    private int timerMinute;
+    private int timerValue;
+    private String ticName;
+    private boolean motionSensor;
+    private boolean audioSensor;
+    private String motionSensitivity;
+    private String audioSensitivity;
     private boolean hapticFeedback;
     private boolean audioFeedback;
-    private boolean visualFeedback;
 
-    public SessionDetails(int timerHour, int timerMinute, boolean hapticFeedback, boolean audioFeedback,
-                          boolean visualFeedback) {
-        this.timerHour = timerHour;
-        this.timerMinute = timerMinute;
+    public SessionDetails(int timerValue, String ticName, boolean motionSensor,
+                          boolean audioSensor, String motionSensitivity, String audioSensitivity,
+                          boolean hapticFeedback, boolean audioFeedback) {
+        this.timerValue = timerValue;
+        this.ticName = ticName;
+        this.motionSensor = motionSensor;
+        this.audioSensor = audioSensor;
+        this.motionSensitivity = motionSensitivity;
+        this.audioSensitivity = audioSensitivity;
         this.hapticFeedback = hapticFeedback;
         this.audioFeedback = audioFeedback;
-        this.visualFeedback = visualFeedback;
     }
 
-    public int getTimerHour() {
-        return timerHour;
+    public int getTimerValue() { return timerValue; }
+
+    public String getTicName() { return ticName; }
+
+    public boolean getMotionSensor() {
+        return motionSensor;
     }
 
-    public int getTimerMinute() { return timerMinute; }
-
-    public boolean getHapticFeedback() {
-        return hapticFeedback;
+    public boolean getAudioSensor() {
+        return audioSensor;
     }
+
+    public String getMotionSensitivity() { return motionSensitivity; }
+
+    public String getAudioSensitivity() { return audioSensitivity; }
+
+    public boolean getHapticFeedback() { return hapticFeedback; }
 
     public boolean getAudioFeedback() {
         return audioFeedback;
-    }
-
-    public boolean getVisualFeedback() {
-        return visualFeedback;
     }
 
 }

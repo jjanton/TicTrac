@@ -7,24 +7,17 @@
     tools:context=".session.midsession.SessionFragment">
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="HELLO DURING SESSION"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/countdownTimerTextView"
+        android:layout_width="231dp"
+        android:layout_height="168dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:textSize="64sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/vibratorButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="21dp"
-        android:text="Click To Vibrate"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="00:00" />
 
     <TextView
         android:id="@+id/motionCounter"
@@ -32,9 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vibratorButton"
+        app:layout_constraintTop_toBottomOf="@+id/countdownTimerTextView"
         tools:text="MOTION COUNTER" />
 
     <TextView
@@ -42,37 +34,149 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/motionCounter"
-        app:layout_constraintVertical_bias="0.18"
         tools:text="AUDIO COUNTER" />
 
-    <TextView
-        android:id="@+id/countdownTimer"
-        android:layout_width="326dp"
-        android:layout_height="286dp"
-        android:gravity="center"
-        android:textSize="64sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintEnd_toEndOf="parent"
+    <ToggleButton
+        android:id="@+id/motionSensorToggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginTop="32dp"
+        android:textOff="@string/motion_off"
+        android:textOn="@string/motion_on"
+        app:layout_constraintEnd_toStartOf="@+id/motionSensorRadioGroup"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.23000002"
-        tools:text="00:00" />
+        app:layout_constraintTop_toBottomOf="@id/audioCounter" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="283dp"
-        android:layout_height="247dp"
-        android:progressDrawable="@drawable/circle"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
+    <RadioGroup
+        android:id="@+id/motionSensorRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/motionSensorToggleButton2"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/motionSensorToggleButton2"
+        app:layout_constraintTop_toTopOf="@+id/motionSensorToggleButton2">
+
+        <RadioButton
+            android:id="@+id/lowHaptic"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Low"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="141dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+        <RadioButton
+            android:id="@+id/mediumHaptic"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Medium"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="218dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+        <RadioButton
+            android:id="@+id/highHaptic"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="High"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="317dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+    </RadioGroup>
+
+    <ToggleButton
+        android:id="@+id/audioSensorToggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginTop="32dp"
+        android:textOff="@string/mic_off"
+        android:textOn="@string/mic_on"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/audioSensorRadioGroup"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.32999998" />
+        app:layout_constraintTop_toBottomOf="@id/motionSensorToggleButton2"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <RadioGroup
+        android:id="@+id/audioSensorRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@+id/audioSensorToggleButton2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/audioSensorToggleButton2"
+        app:layout_constraintTop_toTopOf="@+id/audioSensorToggleButton2">
+
+        <RadioButton
+            android:id="@+id/lowAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Low"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="141dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+        <RadioButton
+            android:id="@+id/mediumAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Medium"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="218dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+        <RadioButton
+            android:id="@+id/highAudio"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="High"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="317dp"
+            tools:layout_editor_absoluteY="397dp" />
+
+    </RadioGroup>
+
+    <ToggleButton
+        android:id="@+id/hapticFeedbackToggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginTop="32dp"
+        android:textOff="@string/haptic_feedback_off"
+        android:textOn="@string/haptic_feedback_on"
+        app:layout_constraintEnd_toStartOf="@+id/audioFeedbackToggleButton2"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton2" />
+
+    <ToggleButton
+        android:id="@+id/audioFeedbackToggleButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16sp"
+        android:layout_marginTop="32dp"
+        android:textOff="@string/sound_off"
+        android:textOn="@string/sound_on"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/hapticFeedbackToggleButton2"
+        app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton2" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
