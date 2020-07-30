@@ -5,33 +5,88 @@
     android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:background="#206C91">
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/sessionActivityButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:background="#8ABDD5"
+        android:color="#8ABDD5"
         android:text="@string/start_a_new_session"
+        android:textColor="#206C91"
+        android:textSize="26sp"
+        android:theme="@style/Theme.MaterialComponents"
+        app:backgroundTint="#FFFBA1"
+        app:icon="@drawable/ic_add_24"
+        app:iconTint="#206C91"
+        app:cornerRadius="24dp"
+        app:rippleColor="#2778A0"
         app:layout_constraintBottom_toTopOf="@+id/statsActivityButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.79"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/statsActivityButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:text="@string/view_past_session_results"
+        android:textColor="#206C91"
+        android:textSize="20sp"
+        android:theme="@style/Theme.MaterialComponents"
+        app:backgroundTint="#C8E8F7"
+        app:cornerRadius="24dp"
+        app:rippleColor="#2778A0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.51"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sessionActivityButton" />
+
+    <TextView
+        android:id="@+id/TicTracLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tic  Trac"
+        android:textSize="72sp"
+        android:fontFamily="@font/quicksand"
+        android:textColor="#C8E8F7"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.060000002" />
+
+    <TextView
+        android:id="@+id/TicTracSlash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/quicksand"
+        android:text="/"
+        android:textColor="#FFFBA1"
+        android:textSize="72sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.435"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.059" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="240dp"
+        android:layout_height="224dp"
+        app:layout_constraintBottom_toTopOf="@+id/sessionActivityButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TicTracLogo"
+        app:srcCompat="@drawable/ic_track_changes_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>
