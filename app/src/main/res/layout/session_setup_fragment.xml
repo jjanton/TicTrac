@@ -5,22 +5,9 @@
     android:id="@+id/ConstraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".session.presession.SessionSetupFragment">
-
-    <!--    <EditText-->
-    <!--        android:id="@+id/timerEditText"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginHorizontal="16sp"-->
-    <!--        android:layout_marginBottom="16sp"-->
-    <!--        android:inputType="number"-->
-    <!--        android:textAlignment="center"-->
-    <!--        app:layout_constraintBottom_toTopOf="@+id/hapticFeedbackToggleButton"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent"-->
-    <!--        app:layout_constraintVertical_bias="0.88"-->
-    <!--        app:layout_constraintVertical_chainStyle="packed" />-->
+    android:background="#206C91"
+    tools:context=".session.presession.SessionSetupFragment"
+    >
 
     <EditText
         android:id="@+id/timerTextView"
@@ -28,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="136dp"
         android:ems="10"
+        android:hint="Enter value for timer"
         android:inputType="number"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -42,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:ems="10"
+        android:hint="Enter Tic Name"
         android:inputType="textPersonName"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
