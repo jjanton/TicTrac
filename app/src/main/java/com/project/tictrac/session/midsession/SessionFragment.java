@@ -1,5 +1,8 @@
 package com.project.tictrac.session.midsession;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -7,49 +10,49 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.project.tictrac.R;
+import com.project.tictrac.Utils;
 import com.project.tictrac.session.presession.SessionDetails;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.SENSOR_SERVICE;
 
-//TODO: We aren't stopping the motion/audio listeners. Even if you go back to another activity,
-// they are still active. We need to stop the listeners when appropriate (eg. when a session
-// timer ends, or when the user closes the app, or navigates away from the session fragment)
-
 public class SessionFragment extends Fragment {
     final String LOG = "AudioRecorder";
 
-    // Tic name, timer value, haptic feedback enabled, audio feedback enabled
     private SessionDetails sessionDetails;
 
-    // Motion Sensor stuff
     private SensorManager sensorManager;
     private MotionEventListener motionEventListener;
 
-    // Audio Recorder stuff
     private MediaRecorder mediaRecorder;
     private MaxAmplitudeRecorder amplitudeRecorder;
 
-    // Timer stuff
     private CountDownTimer countDownTimer;
 
-    // UI Stuff
     private SessionViewModel mViewModel;
     private TextView countdownTimerTextView;
     private TextView motionCounter;
@@ -60,6 +63,9 @@ public class SessionFragment extends Fragment {
     private RadioGroup audioSensorRadioGroup;
     private ToggleButton hapticFeedbackToggleButton2;
     private ToggleButton audioFeedbackToggleButton2;
+
+    private boolean motionSensorPreviouslyEnabled = false;
+    private boolean audioSensorPreviouslyEnabled = false;
 
 
     public static SessionFragment newInstance() {
@@ -72,12 +78,56 @@ public class SessionFragment extends Fragment {
         return inflater.inflate(R.layout.session_fragment, container, false);
     }
 
-    private void setupUI() {
+    @Override
+    public void onPause() {
+        super.onPause();
 
+        if (mViewModel.isMotionSensorEnabled()) {
+            mViewModel.setMotionSensorEnabled(false);
+            motionSensorPreviouslyEnabled = true;
+            stopReadingMotionData();
+        }
+
+        if (mViewModel.isAudioSensorEnabled()) {
+            mViewModel.setAudioSensorEnabled(false);
+            audioSensorPreviouslyEnabled = true;
+            stopReadingAudioData();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (motionSensorPreviouslyEnabled) {
+            mViewModel.setMotionSensorEnabled(true);
+            motionSensorPreviouslyEnabled = false;
+            startReadingMotionData();
+        }
+
+        if (audioSensorPreviouslyEnabled) {
+            mViewModel.setAudioSensorEnabled(true);
+            audioSensorPreviouslyEnabled = false;
+            startReadingAudioData();
+        }
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        setupUI();
+        setButtonListeners();
+        initializeUIState();
+        createCountDownTimer();
+    }
+
+    private void setupUI() {
         // View model setup
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
         mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
+
+        sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
 
         // Get UI elements
         countdownTimerTextView = getView().findViewById(R.id.countdownTimerTextView);
@@ -91,6 +141,27 @@ public class SessionFragment extends Fragment {
         audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
         motionCounter.setText("Motion Counter: 0");
         audioCounter.setText("Audio Counter: 0");
+
+        // Get get the SessionDetail object that was set as this fragment's arguments
+        Bundle bundle = getArguments();
+        assert bundle != null;
+
+        // Extract info from SessionDetail object
+        if (bundle.containsKey("details")) {
+            sessionDetails = (SessionDetails) bundle.getSerializable("details");
+
+            mViewModel.setTimerValue(sessionDetails.getTimerValue());
+            mViewModel.setTicName(sessionDetails.getTicName());
+
+            mViewModel.setMotionSensorEnabled(sessionDetails.getMotionSensor());
+            mViewModel.setAudioSensorEnabled(sessionDetails.getAudioSensor());
+
+            mViewModel.setHapticFeedbackEnabled(sessionDetails.getHapticFeedback());
+            mViewModel.setAudioFeedbackEnabled(sessionDetails.getAudioFeedback());
+
+            mViewModel.setMotionSensitivity(sessionDetails.getMotionSensitivity());
+            mViewModel.setAudioSensitivity(sessionDetails.getAudioSensitivity());
+        }
 
         // Observer for motionCounter
         final Observer<Integer> motionCounterObserver = new Observer<Integer>() {
@@ -107,22 +178,33 @@ public class SessionFragment extends Fragment {
                 audioCounter.setText("Audio Counter: " + String.valueOf(integer));
             }
         };
-
         // Tell observers to observe the data in mViewModel
         mViewModel.getMotionCounter().observe(getViewLifecycleOwner(), motionCounterObserver);
         mViewModel.getAudioCounter().observe(getViewLifecycleOwner(), audioCounterObserver);
 
+        // referenced (in part) from https://stackoverflow.com/questions/56319759/how-to-show-warning-message-when-back-button-is-pressed-in-fragments
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                displayNewLinkPopup(getContext());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
+
+    }
+
+    private void setButtonListeners() {
         // Listener for motionSensor toggle
         motionSensorToggleButton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (motionSensorToggleButton2.isChecked()) {
                     startReadingMotionData();
+                    Utils.setRadioGroup(motionSensorRadioGroup, true);
                 } else {
                     stopReadingMotionData();
+                    Utils.setRadioGroup(motionSensorRadioGroup, false);
                 }
-                System.out.println(mViewModel.getMotionSensitivity());
-
             }
         });
 
@@ -132,10 +214,11 @@ public class SessionFragment extends Fragment {
             public void onClick(View v) {
                 if (audioSensorToggleButton2.isChecked()) {
                     startReadingAudioData();
+                    Utils.setRadioGroup(audioSensorRadioGroup, true);
                 } else {
                     stopReadingAudioData();
+                    Utils.setRadioGroup(audioSensorRadioGroup, false);
                 }
-                System.out.println(mViewModel.getAudioSensitivity());
             }
         });
 
@@ -161,16 +244,36 @@ public class SessionFragment extends Fragment {
             }
         });
 
+        hapticFeedbackToggleButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.setHapticFeedbackEnabled(hapticFeedbackToggleButton2.isChecked());
+            }
+        });
+
+        audioFeedbackToggleButton2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.setAudioFeedbackEnabled(audioFeedbackToggleButton2.isChecked());
+            }
+        });
     }
 
     private void initializeUIState() {
         if (mViewModel.isMotionSensorEnabled()) {
             this.motionSensorToggleButton2.setChecked(true);
+            Utils.setRadioGroup(motionSensorRadioGroup, true);
             startReadingMotionData();
+        } else {
+            Utils.setRadioGroup(motionSensorRadioGroup, false);
         }
+
         if (mViewModel.isAudioSensorEnabled()) {
             this.audioSensorToggleButton2.setChecked(true);
+            Utils.setRadioGroup(audioSensorRadioGroup, true);
             startReadingAudioData();
+        } else {
+            Utils.setRadioGroup(audioSensorRadioGroup, false);
         }
 
         switch (mViewModel.getMotionSensitivity()) {
@@ -202,40 +305,6 @@ public class SessionFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
-
-        // Setup user interface
-        setupUI();
-
-        // Get get the SessionDetail object that was set as this fragment's arguments
-        Bundle bundle = getArguments();
-        assert bundle != null;
-
-        // Extract info from SessionDetail object
-        if (bundle.containsKey("details")) {
-            sessionDetails = (SessionDetails) bundle.getSerializable("details");
-
-            mViewModel.setTimerValue(sessionDetails.getTimerValue());
-            mViewModel.setTicName(sessionDetails.getTicName());
-
-            mViewModel.setMotionSensorEnabled(sessionDetails.getMotionSensor());
-            mViewModel.setAudioSensorEnabled(sessionDetails.getAudioSensor());
-
-            mViewModel.setHapticFeedbackEnabled(sessionDetails.getHapticFeedback());
-            mViewModel.setAudioFeedbackEnabled(sessionDetails.getAudioFeedback());
-
-            mViewModel.setMotionSensitivity(sessionDetails.getMotionSensitivity());
-            mViewModel.setAudioSensitivity(sessionDetails.getAudioSensitivity());
-        }
-
-        initializeUIState();
-        createCountDownTimer();
-    }
-
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
      * and the example code that comes with the book, method startReadingAccelerationData() from
@@ -248,6 +317,8 @@ public class SessionFragment extends Fragment {
 
         RunnableThread runnableThread = new RunnableThread(motionEventListener, sensorManager);
         new Thread(runnableThread).start();
+
+
     }
 
     private void setMotionSensorSensitivity(String sensitivity) {
@@ -264,6 +335,7 @@ public class SessionFragment extends Fragment {
     private void stopReadingMotionData() {
         sensorManager.unregisterListener(motionEventListener);
         mViewModel.setMotionSensorEnabled(false);
+        motionEventListener = null;
     }
 
     /**
@@ -279,7 +351,7 @@ public class SessionFragment extends Fragment {
                 getContext().getExternalFilesDir("temp_audio").getAbsolutePath()
                         + File.separator + "audio.3gp";
 
-        amplitudeRecorder = new MaxAmplitudeRecorder(10000, appStorageLocation,
+        amplitudeRecorder = new MaxAmplitudeRecorder(appStorageLocation,
                 getContext(), mViewModel);
 
         RunnableThread runnableThread = new RunnableThread(amplitudeRecorder);
@@ -301,7 +373,6 @@ public class SessionFragment extends Fragment {
         }
     }
 
-
     // referenced from https://developer.android.com/reference/android/os/CountDownTimer
     private void createCountDownTimer() {
         countDownTimer = new CountDownTimer(mViewModel.getTimerValue() * 60000, 1000) {
@@ -320,6 +391,32 @@ public class SessionFragment extends Fragment {
                         Toast.LENGTH_SHORT).show();
             }
         }.start();
+    }
+
+    private void pauseTimer() {
+        countDownTimer.cancel();
+    }
+
+    private void resumeTimer() {
+
+    }
+
+    // Referenced (in part) from: https://www.sitepoint.com/starting-android-development-creating-todo-app/
+    private void displayNewLinkPopup(Context context) {
+        AlertDialog popup = new AlertDialog.Builder(context)
+                .setTitle("Warning")
+                .setMessage("Any changes will not be saved. Are you sure?")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Go Back", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        stopReadingAudioData();
+                        stopReadingMotionData();
+                        requireActivity().getSupportFragmentManager().popBackStack();
+                    }
+                })
+                .create();
+        popup.show();
     }
 
 }

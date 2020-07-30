@@ -29,7 +29,7 @@ public class SessionViewModel extends ViewModel {
     public MutableLiveData<Integer> getAudioCounter() { return audioCounter; }
 
     void incrementMotionCounter () {
-        Integer newValue = (motionCounter.getValue() == null) ? 0 : motionCounter.getValue() + 1;
+        Integer newValue = (motionCounter == null) ? 0 : motionCounter.getValue() + 1;
         motionCounter.setValue(newValue);
     }
 
@@ -69,22 +69,5 @@ public class SessionViewModel extends ViewModel {
     public String getAudioSensitivity() { return audioSensitivity; }
 
     public void setAudioSensitivity(String audioSensitivity) { this.audioSensitivity = audioSensitivity; }
-
-
-//    public int getMotionCounterValue() {
-//        if (motionCounter == null) {
-//            return 0;
-//        } else {
-//            return (int) motionCounter.getValue();
-//        }
-//    }
-//
-//    public int getAudioCounterValue() {
-//        if (audioCounter == null) {
-//            return 0;
-//        } else {
-//            return (int) audioCounter.getValue();
-//        }
-//    }
 
 }

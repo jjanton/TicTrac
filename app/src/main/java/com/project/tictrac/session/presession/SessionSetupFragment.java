@@ -20,6 +20,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.project.tictrac.R;
+import com.project.tictrac.Utils;
 import com.project.tictrac.session.SessionActivityCallback;
 
 public class SessionSetupFragment extends Fragment {
@@ -70,6 +71,12 @@ public class SessionSetupFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        clearAllSettings();
+    }
+
     /**
      * This method sets up UI elements and click listeners, to be called in onActivityCreated
      */
@@ -84,6 +91,31 @@ public class SessionSetupFragment extends Fragment {
         motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
 
+        Utils.setRadioGroup(motionSensorRadioGroup, false);
+        Utils.setRadioGroup(audioSensorRadioGroup, false);
+
+        motionSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (motionSensorToggleButton.isChecked()) {
+                    Utils.setRadioGroup(motionSensorRadioGroup, true);
+                } else {
+                    Utils.setRadioGroup(motionSensorRadioGroup, false);
+                }
+            }
+        });
+
+        // Listener for audioSensor toggle
+        audioSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (audioSensorToggleButton.isChecked()) {
+                    Utils.setRadioGroup(audioSensorRadioGroup, true);
+                } else {
+                    Utils.setRadioGroup(audioSensorRadioGroup, false);
+                }
+            }
+        });
 
         // Set click listener for startSessionButton. Build a SessionDetails object,
         // and pass it back to the SessionActivity callback
@@ -95,12 +127,12 @@ public class SessionSetupFragment extends Fragment {
             RadioButton motionSensorRadioButton = getView().findViewById(selectedMotionSensorId);
             RadioButton audioSensorRadioButton = getView().findViewById(selectedAudioSensorId);
 
+            // Have to enter a timer value, timer value needs to be at least 1 minute,
+            // have to enter a tic name
             if (timerTextView.getText().toString().equals("")
-                    || ticNameTextView.getText().toString().equals("")
-                    || selectedMotionSensorId == -1
-                    || selectedAudioSensorId == -1) {
-
-                Toast.makeText(getContext(), "FILL IN ALL FIELDS!",
+                    || Integer.parseInt(timerTextView.getText().toString()) < 1
+                    || ticNameTextView.getText().toString().equals("")) {
+                Toast.makeText(getContext(), "Enter a tic name and a timer value of at least 1 minute!",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -110,15 +142,27 @@ public class SessionSetupFragment extends Fragment {
                     ticNameTextView.getText().toString(),
                     motionSensorToggleButton.isChecked(),
                     audioSensorToggleButton.isChecked(),
-                    motionSensorRadioButton.getText().toString(),
-                    audioSensorRadioButton.getText().toString(),
+                    motionSensorRadioButton == null ? "Medium" : motionSensorRadioButton.getText().toString(),
+                    audioSensorRadioButton == null ? "Medium" : audioSensorRadioButton.getText().toString(),
                     hapticFeedbackToggleButton.isChecked(),
                     audioFeedbackToggleButton.isChecked()
-
             );
 
             activityCallback.beginSessionButtonClicked(details);
         });
+    }
+
+    private void clearAllSettings() {
+        ticNameTextView.setText(null);
+        timerTextView.setText(null);
+        motionSensorToggleButton.setChecked(false);
+        audioSensorToggleButton.setChecked(false);
+        hapticFeedbackToggleButton.setChecked(false);
+        audioFeedbackToggleButton.setChecked(false);
+        Utils.setRadioGroup(motionSensorRadioGroup, false);
+        Utils.setRadioGroup(audioSensorRadioGroup, false);
+        motionSensorRadioGroup.clearCheck();
+        audioSensorRadioGroup.clearCheck();
     }
 
 }
