@@ -2,21 +2,14 @@ package com.project.tictrac.session.midsession;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
-import android.se.omapi.Session;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
-import com.project.tictrac.MainActivity;
 import com.project.tictrac.Utils;
-import com.project.tictrac.session.SessionActivity;
-
-import java.util.concurrent.TimeUnit;
 
 // This class referenced (in part) from: https://guides.codepath.com/android/using-dialogfragment
 public class EndSessionDialogFragment extends DialogFragment {

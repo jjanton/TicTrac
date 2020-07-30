@@ -34,6 +34,9 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
         setTHRESHOLD(mViewModel.getMotionSensitivity());
     }
 
+
+    //TODO: start logging everything to find this bug (maybe start by logging exceeding threshold)
+    //TODO: when is onsensorchanged getting called...?
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (mViewModel.isMotionSensorEnabled()) {

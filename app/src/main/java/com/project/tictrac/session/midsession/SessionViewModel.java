@@ -8,6 +8,9 @@ public class SessionViewModel extends ViewModel {
     private MutableLiveData<Integer> audioCounter = new MutableLiveData<>();
 
     private int timerValue;
+    private boolean isTimerPaused;
+    private long timeRemaining;
+
     private String ticName;
 
     private boolean motionSensorEnabled;
@@ -18,6 +21,8 @@ public class SessionViewModel extends ViewModel {
 
     private String motionSensitivity;
     private String audioSensitivity;
+
+
 
     public SessionViewModel() {
         motionCounter.setValue(0);
@@ -41,6 +46,10 @@ public class SessionViewModel extends ViewModel {
     public int getTimerValue() { return timerValue; }
 
     public void setTimerValue(int timerValue) { this.timerValue = timerValue; }
+
+    public boolean isTimerPaused() { return isTimerPaused; }
+
+    public void setTimerPaused(boolean timerPaused) { isTimerPaused = timerPaused; }
 
     public String getTicName() { return ticName; }
 
@@ -70,4 +79,11 @@ public class SessionViewModel extends ViewModel {
 
     public void setAudioSensitivity(String audioSensitivity) { this.audioSensitivity = audioSensitivity; }
 
+    public long getTimeRemaining() {
+        return timeRemaining;
+    }
+
+    public void setTimeRemaining(long timeRemaining) {
+        this.timeRemaining = timeRemaining;
+    }
 }

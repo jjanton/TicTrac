@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -68,6 +69,8 @@ public class SessionFragment extends Fragment {
     private RadioGroup audioSensorRadioGroup;
     private ToggleButton hapticFeedbackToggleButton2;
     private ToggleButton audioFeedbackToggleButton2;
+    private ImageButton pauseButton;
+    private ImageButton endSessionButton;
 
     private boolean motionSensorPreviouslyEnabled = false;
     private boolean audioSensorPreviouslyEnabled = false;
@@ -100,6 +103,10 @@ public class SessionFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        if (countDownTimer != null) {
+            pauseTimer(mViewModel.getTimeRemaining());
+        }
+
         if (mViewModel.isMotionSensorEnabled()) {
             mViewModel.setMotionSensorEnabled(false);
             motionSensorPreviouslyEnabled = true;
@@ -116,6 +123,9 @@ public class SessionFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        resumeTimer();
+
         if (motionSensorPreviouslyEnabled) {
             mViewModel.setMotionSensorEnabled(true);
             motionSensorPreviouslyEnabled = false;
@@ -136,7 +146,7 @@ public class SessionFragment extends Fragment {
         setupUI();
         setButtonListeners();
         initializeUIState();
-        createCountDownTimer();
+        countDownTimer = createCountDownTimer(mViewModel.getTimerValue() * 60000, 1000);
     }
 
     private void setupUI() {
@@ -147,6 +157,8 @@ public class SessionFragment extends Fragment {
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
         mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
+
+        mViewModel.setTimerPaused(false);
 
         sensorManager = (SensorManager) requireContext().getSystemService(SENSOR_SERVICE);
 
@@ -162,6 +174,8 @@ public class SessionFragment extends Fragment {
         audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
         motionCounter.setText("Motion Counter: 0");
         audioCounter.setText("Audio Counter: 0");
+        pauseButton = getView().findViewById(R.id.pauseButton);
+        endSessionButton = getView().findViewById(R.id.endSessionButton);
 
         // Get get the SessionDetail object that was set as this fragment's arguments
         Bundle bundle = getArguments();
@@ -284,6 +298,18 @@ public class SessionFragment extends Fragment {
                 mViewModel.setAudioFeedbackEnabled(audioFeedbackToggleButton2.isChecked());
             }
         });
+
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (!mViewModel.isTimerPaused() && countDownTimer != null) {
+                    pauseTimer(mViewModel.getTimeRemaining());
+                } else {
+                    resumeTimer();
+                }
+            }
+        });
     }
 
     private void initializeUIState() {
@@ -401,29 +427,47 @@ public class SessionFragment extends Fragment {
     }
 
     // referenced from https://developer.android.com/reference/android/os/CountDownTimer
-    private void createCountDownTimer() {
-        countDownTimer = new CountDownTimer(mViewModel.getTimerValue() * 60000, 1000) {
+    private CountDownTimer createCountDownTimer(long millis, int interval) {
+        mViewModel.setTimerPaused(false);
+
+        return new CountDownTimer(millis, interval) {
+
             @Override
             public void onTick(long millisUntilFinished) {
-                countdownTimerTextView.setText(String.format("%s:%s",
-                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60,
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60
-                ));
+                if (mViewModel.isTimerPaused()) {
+                    cancel();
+                    mViewModel.setTimerPaused(true);
+                    countDownTimer = null;
+                } else {
+                    mViewModel.setTimeRemaining(millisUntilFinished);
+                    countdownTimerTextView.setText(String.format("%s:%s",
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60,
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60
+                    ));
+                }
+
             }
 
             @Override
             public void onFinish() {
-                endSession();
+                System.out.println("IN THE ON FINISH");
+                if (countDownTimer != null && !mViewModel.isTimerPaused()) {
+//                    endSession();
+                }
             }
         }.start();
     }
 
-    private void pauseTimer() {
+    private void pauseTimer(long millisUntilFinished) {
         countDownTimer.cancel();
+        mViewModel.setTimerPaused(true);
+        mViewModel.setTimeRemaining(millisUntilFinished);
+        countDownTimer = null;
     }
 
     private void resumeTimer() {
-
+        mViewModel.setTimerPaused(false);
+        countDownTimer = createCountDownTimer(mViewModel.getTimeRemaining(), 1000);
     }
 
     // Referenced (in part) from: https://www.sitepoint.com/starting-android-development-creating-todo-app/
@@ -475,7 +519,7 @@ public class SessionFragment extends Fragment {
                 String.valueOf(mViewModel.getMotionCounter().getValue()),
                 String.valueOf(mViewModel.getAudioCounter().getValue())
         );
-        dialogFragment.show(fragmentManager,"fragment_alert");
+        dialogFragment.show(fragmentManager, "fragment_alert");
     }
 
     private void endSession() {
