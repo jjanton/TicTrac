@@ -1,8 +1,10 @@
 package com.project.tictrac.session.midsession;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -32,6 +35,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
+import com.project.tictrac.session.SessionActivityCallback;
 import com.project.tictrac.session.presession.SessionDetails;
 
 import java.io.File;
@@ -41,14 +45,15 @@ import java.util.concurrent.TimeUnit;
 import static android.content.Context.SENSOR_SERVICE;
 
 public class SessionFragment extends Fragment {
+    private static final Object FLAG_KEEP_SCREEN_ON = true;
     final String LOG = "AudioRecorder";
+
+    private SessionActivityCallback activityCallback;
 
     private SessionDetails sessionDetails;
 
     private SensorManager sensorManager;
     private MotionEventListener motionEventListener;
-
-    private MediaRecorder mediaRecorder;
     private MaxAmplitudeRecorder amplitudeRecorder;
 
     private CountDownTimer countDownTimer;
@@ -67,7 +72,6 @@ public class SessionFragment extends Fragment {
     private boolean motionSensorPreviouslyEnabled = false;
     private boolean audioSensorPreviouslyEnabled = false;
 
-
     public static SessionFragment newInstance() {
         return new SessionFragment();
     }
@@ -76,6 +80,20 @@ public class SessionFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.session_fragment, container, false);
+    }
+
+    /**
+     * Defines interface object SessionActivityCallback so this fragment can callback to
+     * functions in the SessionActivity
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            activityCallback = (SessionActivityCallback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "Must Implement SessionActivityCallback");
+        }
     }
 
     @Override
@@ -122,12 +140,15 @@ public class SessionFragment extends Fragment {
     }
 
     private void setupUI() {
+        // Keep screen on while we are in this fragment
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // View model setup
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
         mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
-        sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) requireContext().getSystemService(SENSOR_SERVICE);
 
         // Get UI elements
         countdownTimerTextView = getView().findViewById(R.id.countdownTimerTextView);
@@ -213,8 +234,14 @@ public class SessionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (audioSensorToggleButton2.isChecked()) {
-                    startReadingAudioData();
-                    Utils.setRadioGroup(audioSensorRadioGroup, true);
+
+                    if (Utils.isAudioPermissionGranted(getContext())) {
+                        Utils.setRadioGroup(audioSensorRadioGroup, true);
+                        startReadingAudioData();
+                    } else {
+                        requestPermissions(new String[]{
+                                Manifest.permission.RECORD_AUDIO}, 1);
+                    }
                 } else {
                     stopReadingAudioData();
                     Utils.setRadioGroup(audioSensorRadioGroup, false);
@@ -386,9 +413,7 @@ public class SessionFragment extends Fragment {
 
             @Override
             public void onFinish() {
-                //TODO: Probably launch an explicit intent for the post session
-                Toast.makeText(getContext(), "TIMER IS DONE!",
-                        Toast.LENGTH_SHORT).show();
+                endSession();
             }
         }.start();
     }
@@ -412,11 +437,50 @@ public class SessionFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         stopReadingAudioData();
                         stopReadingMotionData();
-                        requireActivity().getSupportFragmentManager().popBackStack();
+                        Utils.returnToMainMenu(getContext());
+                        requireActivity().finish();
                     }
                 })
                 .create();
         popup.show();
     }
+
+    // Referenced (in part) from: https://stackoverflow.com/questions/48762146/record-audio-permission-is-not-displayed-in-my-application-on-starting-the-appli/48762230
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getContext(), "Audio Permission Granted",
+                    Toast.LENGTH_SHORT).show();
+
+            audioSensorToggleButton2.setChecked(true);
+            Utils.setRadioGroup(audioSensorRadioGroup, true);
+            startReadingAudioData();
+        } else {
+            Toast.makeText(getContext(), "Audio Permissions Are Required To Use This Feature",
+                    Toast.LENGTH_LONG).show();
+
+            audioSensorToggleButton2.setChecked(false);
+            Utils.setRadioGroup(audioSensorRadioGroup, false);
+            stopReadingAudioData();
+        }
+    }
+
+    private void createDialogFragment() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        EndSessionDialogFragment dialogFragment = EndSessionDialogFragment.newInstance(
+                mViewModel.getTicName(),
+                String.valueOf(mViewModel.getMotionCounter().getValue()),
+                String.valueOf(mViewModel.getAudioCounter().getValue())
+        );
+        dialogFragment.show(fragmentManager,"fragment_alert");
+    }
+
+    private void endSession() {
+        createDialogFragment();
+    }
+
 
 }

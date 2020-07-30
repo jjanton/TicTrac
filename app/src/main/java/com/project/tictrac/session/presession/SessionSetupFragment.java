@@ -2,7 +2,9 @@ package com.project.tictrac.session.presession;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -48,15 +51,6 @@ public class SessionSetupFragment extends Fragment {
         return inflater.inflate(R.layout.session_setup_fragment, container, false);
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = new ViewModelProvider(this).get(SessionSetupViewModel.class);
-
-        // Get UI elements, setup click listeners
-        setupUI();
-    }
-
     /**
      * Defines interface object SessionActivityCallback so this fragment can callback to
      * functions in the SessionActivity
@@ -77,10 +71,22 @@ public class SessionSetupFragment extends Fragment {
         clearAllSettings();
     }
 
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mViewModel = new ViewModelProvider(this).get(SessionSetupViewModel.class);
+
+        // Get UI elements, setup click listeners
+        setupUI();
+        setButtonListeners();
+    }
+
     /**
      * This method sets up UI elements and click listeners, to be called in onActivityCreated
      */
     private void setupUI() {
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         timerTextView = getView().findViewById(R.id.timerTextView);
         ticNameTextView = getView().findViewById(R.id.ticNameTextView);
         motionSensorToggleButton = getView().findViewById(R.id.motionSensorToggleButton);
@@ -93,7 +99,9 @@ public class SessionSetupFragment extends Fragment {
 
         Utils.setRadioGroup(motionSensorRadioGroup, false);
         Utils.setRadioGroup(audioSensorRadioGroup, false);
+    }
 
+    private void setButtonListeners() {
         motionSensorToggleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,7 +118,15 @@ public class SessionSetupFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (audioSensorToggleButton.isChecked()) {
-                    Utils.setRadioGroup(audioSensorRadioGroup, true);
+
+                    if (Utils.isAudioPermissionGranted(getContext())) {
+                        audioSensorToggleButton.setChecked(true);
+                        Utils.setRadioGroup(audioSensorRadioGroup, true);
+                    } else {
+                        requestPermissions(new String[]{
+                                Manifest.permission.RECORD_AUDIO}, 1);
+                    }
+
                 } else {
                     Utils.setRadioGroup(audioSensorRadioGroup, false);
                 }
@@ -163,6 +179,27 @@ public class SessionSetupFragment extends Fragment {
         Utils.setRadioGroup(audioSensorRadioGroup, false);
         motionSensorRadioGroup.clearCheck();
         audioSensorRadioGroup.clearCheck();
+    }
+
+    // Referenced (in part) from: https://stackoverflow.com/questions/48762146/record-audio-permission-is-not-displayed-in-my-application-on-starting-the-appli/48762230
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getContext(), "Audio Permission Granted",
+                    Toast.LENGTH_SHORT).show();
+
+            audioSensorToggleButton.setChecked(true);
+            Utils.setRadioGroup(audioSensorRadioGroup, true);
+        } else {
+            Toast.makeText(getContext(), "Audio Permissions Are Required To Use This Feature",
+                    Toast.LENGTH_LONG).show();
+
+            audioSensorToggleButton.setChecked(false);
+            Utils.setRadioGroup(audioSensorRadioGroup, false);
+        }
     }
 
 }
