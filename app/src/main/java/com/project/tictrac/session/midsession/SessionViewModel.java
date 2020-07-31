@@ -22,11 +22,13 @@ public class SessionViewModel extends ViewModel {
     private String motionSensitivity;
     private String audioSensitivity;
 
+    private MotionEventListener motionEventListener;
 
 
     public SessionViewModel() {
         motionCounter.setValue(0);
         audioCounter.setValue(0);
+        motionEventListener = null;
     }
 
     public MutableLiveData<Integer> getMotionCounter() { return motionCounter; }
@@ -85,5 +87,13 @@ public class SessionViewModel extends ViewModel {
 
     public void setTimeRemaining(long timeRemaining) {
         this.timeRemaining = timeRemaining;
+    }
+
+    public MotionEventListener getMotionEventListener() {
+        return motionEventListener;
+    }
+
+    public void setMotionEventListener(MotionEventListener motionEventListener) {
+        this.motionEventListener = motionEventListener;
     }
 }
