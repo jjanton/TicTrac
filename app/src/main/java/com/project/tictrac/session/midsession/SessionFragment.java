@@ -1,8 +1,11 @@
 package com.project.tictrac.session.midsession;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -10,7 +13,9 @@ import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -32,6 +37,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
+import com.project.tictrac.session.SessionActivityCallback;
 import com.project.tictrac.session.presession.SessionDetails;
 
 import java.io.File;
@@ -41,14 +47,9 @@ import java.util.concurrent.TimeUnit;
 import static android.content.Context.SENSOR_SERVICE;
 
 public class SessionFragment extends Fragment {
-    final String LOG = "AudioRecorder";
-
     private SessionDetails sessionDetails;
 
     private SensorManager sensorManager;
-    private MotionEventListener motionEventListener;
-
-    private MediaRecorder mediaRecorder;
     private MaxAmplitudeRecorder amplitudeRecorder;
 
     private CountDownTimer countDownTimer;
@@ -63,10 +64,11 @@ public class SessionFragment extends Fragment {
     private RadioGroup audioSensorRadioGroup;
     private ToggleButton hapticFeedbackToggleButton2;
     private ToggleButton audioFeedbackToggleButton2;
+    private ImageButton pauseButton;
+    private ImageButton endSessionButton;
 
     private boolean motionSensorPreviouslyEnabled = false;
     private boolean audioSensorPreviouslyEnabled = false;
-
 
     public static SessionFragment newInstance() {
         return new SessionFragment();
@@ -82,33 +84,14 @@ public class SessionFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (mViewModel.isMotionSensorEnabled()) {
-            mViewModel.setMotionSensorEnabled(false);
-            motionSensorPreviouslyEnabled = true;
-            stopReadingMotionData();
-        }
-
-        if (mViewModel.isAudioSensorEnabled()) {
-            mViewModel.setAudioSensorEnabled(false);
-            audioSensorPreviouslyEnabled = true;
-            stopReadingAudioData();
-        }
+        pauseEverything();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (motionSensorPreviouslyEnabled) {
-            mViewModel.setMotionSensorEnabled(true);
-            motionSensorPreviouslyEnabled = false;
-            startReadingMotionData();
-        }
 
-        if (audioSensorPreviouslyEnabled) {
-            mViewModel.setAudioSensorEnabled(true);
-            audioSensorPreviouslyEnabled = false;
-            startReadingAudioData();
-        }
+        resumeEverything();
     }
 
     @Override
@@ -118,16 +101,21 @@ public class SessionFragment extends Fragment {
         setupUI();
         setButtonListeners();
         initializeUIState();
-        createCountDownTimer();
+        countDownTimer = createCountDownTimer(mViewModel.getTimerValue() * 60000, 1000);
     }
 
     private void setupUI() {
+        // Keep screen on while we are in this fragment
+        requireActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
         // View model setup
         SavedStateViewModelFactory factory = new SavedStateViewModelFactory(
                 getActivity().getApplication(), this);
         mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
-        sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
+        mViewModel.setTimerPaused(false);
+
+        sensorManager = (SensorManager) requireContext().getSystemService(SENSOR_SERVICE);
 
         // Get UI elements
         countdownTimerTextView = getView().findViewById(R.id.countdownTimerTextView);
@@ -141,6 +129,8 @@ public class SessionFragment extends Fragment {
         audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
         motionCounter.setText("Motion Counter: 0");
         audioCounter.setText("Audio Counter: 0");
+        pauseButton = getView().findViewById(R.id.pauseButton);
+        endSessionButton = getView().findViewById(R.id.endSessionButton);
 
         // Get get the SessionDetail object that was set as this fragment's arguments
         Bundle bundle = getArguments();
@@ -213,8 +203,14 @@ public class SessionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (audioSensorToggleButton2.isChecked()) {
-                    startReadingAudioData();
-                    Utils.setRadioGroup(audioSensorRadioGroup, true);
+
+                    if (Utils.isAudioPermissionGranted(getContext())) {
+                        Utils.setRadioGroup(audioSensorRadioGroup, true);
+                        startReadingAudioData();
+                    } else {
+                        requestPermissions(new String[]{
+                                Manifest.permission.RECORD_AUDIO}, 1);
+                    }
                 } else {
                     stopReadingAudioData();
                     Utils.setRadioGroup(audioSensorRadioGroup, false);
@@ -255,6 +251,18 @@ public class SessionFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mViewModel.setAudioFeedbackEnabled(audioFeedbackToggleButton2.isChecked());
+            }
+        });
+
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mViewModel.isTimerPaused() && countDownTimer != null) {
+                    pauseEverything();
+                }
+                else {
+                    resumeEverything();
+                }
             }
         });
     }
@@ -312,18 +320,15 @@ public class SessionFragment extends Fragment {
      */
     private void startReadingMotionData() {
         mViewModel.setMotionSensorEnabled(true);
-
-        motionEventListener = new MotionEventListener(getContext(), mViewModel);
-
-        RunnableThread runnableThread = new RunnableThread(motionEventListener, sensorManager);
-        new Thread(runnableThread).start();
-
-
+        mViewModel.setMotionEventListener(new MotionEventListener(getContext(), mViewModel, sensorManager));
+        sensorManager.registerListener(mViewModel.getMotionEventListener(),
+                sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void setMotionSensorSensitivity(String sensitivity) {
-        if (motionEventListener != null) {
-            motionEventListener.setTHRESHOLD(sensitivity);
+        if (mViewModel.getMotionEventListener() != null) {
+            mViewModel.getMotionEventListener().setTHRESHOLD(sensitivity);
         }
     }
 
@@ -333,9 +338,9 @@ public class SessionFragment extends Fragment {
      * class DetermineMovementActivity.java
      */
     private void stopReadingMotionData() {
-        sensorManager.unregisterListener(motionEventListener);
+        sensorManager.unregisterListener(mViewModel.getMotionEventListener());
         mViewModel.setMotionSensorEnabled(false);
-        motionEventListener = null;
+        mViewModel.setMotionEventListener(null);
     }
 
     /**
@@ -374,31 +379,35 @@ public class SessionFragment extends Fragment {
     }
 
     // referenced from https://developer.android.com/reference/android/os/CountDownTimer
-    private void createCountDownTimer() {
-        countDownTimer = new CountDownTimer(mViewModel.getTimerValue() * 60000, 1000) {
+    private CountDownTimer createCountDownTimer(long millis, int interval) {
+        mViewModel.setTimerPaused(false);
+
+        return new CountDownTimer(millis, interval) {
+
             @Override
             public void onTick(long millisUntilFinished) {
-                countdownTimerTextView.setText(String.format("%s:%s",
-                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60,
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60
-                ));
+                if (mViewModel.isTimerPaused()) {
+                    cancel();
+                    mViewModel.setTimerPaused(true);
+                    countDownTimer = null;
+                } else {
+                    mViewModel.setTimeRemaining(millisUntilFinished);
+                    countdownTimerTextView.setText(String.format("%s:%s",
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60,
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60
+                    ));
+                }
+
             }
 
             @Override
             public void onFinish() {
-                //TODO: Probably launch an explicit intent for the post session
-                Toast.makeText(getContext(), "TIMER IS DONE!",
-                        Toast.LENGTH_SHORT).show();
+                System.out.println("IN THE ON FINISH");
+                if (countDownTimer != null && !mViewModel.isTimerPaused()) {
+//                    endSession();
+                }
             }
         }.start();
-    }
-
-    private void pauseTimer() {
-        countDownTimer.cancel();
-    }
-
-    private void resumeTimer() {
-
     }
 
     // Referenced (in part) from: https://www.sitepoint.com/starting-android-development-creating-todo-app/
@@ -412,11 +421,97 @@ public class SessionFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         stopReadingAudioData();
                         stopReadingMotionData();
-                        requireActivity().getSupportFragmentManager().popBackStack();
+                        Utils.returnToMainMenu(getContext());
+                        requireActivity().finish();
                     }
                 })
                 .create();
         popup.show();
     }
+
+    // Referenced (in part) from: https://stackoverflow.com/questions/48762146/record-audio-permission-is-not-displayed-in-my-application-on-starting-the-appli/48762230
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getContext(), "Audio Permission Granted",
+                    Toast.LENGTH_SHORT).show();
+
+            audioSensorToggleButton2.setChecked(true);
+            Utils.setRadioGroup(audioSensorRadioGroup, true);
+            startReadingAudioData();
+        } else {
+            Toast.makeText(getContext(), "Audio Permissions Are Required To Use This Feature",
+                    Toast.LENGTH_LONG).show();
+
+            audioSensorToggleButton2.setChecked(false);
+            Utils.setRadioGroup(audioSensorRadioGroup, false);
+            stopReadingAudioData();
+        }
+    }
+
+    private void createDialogFragment() {
+        FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+        EndSessionDialogFragment dialogFragment = EndSessionDialogFragment.newInstance(
+                mViewModel.getTicName(),
+                String.valueOf(mViewModel.getMotionCounter().getValue()),
+                String.valueOf(mViewModel.getAudioCounter().getValue())
+        );
+        dialogFragment.show(fragmentManager, "fragment_alert");
+    }
+
+    private void endSession() {
+        createDialogFragment();
+    }
+
+    private void pauseTimer(long millisUntilFinished) {
+        countDownTimer.cancel();
+        mViewModel.setTimerPaused(true);
+        mViewModel.setTimeRemaining(millisUntilFinished);
+        countDownTimer = null;
+    }
+
+    private void resumeTimer() {
+        mViewModel.setTimerPaused(false);
+        countDownTimer = createCountDownTimer(mViewModel.getTimeRemaining(), 1000);
+    }
+
+    private void pauseEverything() {
+
+        if (countDownTimer != null) {
+            pauseTimer(mViewModel.getTimeRemaining());
+        }
+
+        if (mViewModel.isMotionSensorEnabled()) {
+            mViewModel.setMotionSensorEnabled(false);
+            motionSensorPreviouslyEnabled = true;
+            stopReadingMotionData();
+        }
+
+        if (mViewModel.isAudioSensorEnabled()) {
+            mViewModel.setAudioSensorEnabled(false);
+            audioSensorPreviouslyEnabled = true;
+            stopReadingAudioData();
+        }
+    }
+
+    private void resumeEverything() {
+        resumeTimer();
+
+        if (motionSensorPreviouslyEnabled) {
+            mViewModel.setMotionSensorEnabled(true);
+            motionSensorPreviouslyEnabled = false;
+            startReadingMotionData();
+        }
+
+        if (audioSensorPreviouslyEnabled) {
+            mViewModel.setAudioSensorEnabled(true);
+            audioSensorPreviouslyEnabled = false;
+            startReadingAudioData();
+        }
+    }
+
 
 }

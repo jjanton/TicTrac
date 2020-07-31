@@ -17,10 +17,10 @@ public class RunnableThread implements Runnable {
         this.amplitudeRecorder = amplitudeRecorder;
     }
 
-    public RunnableThread(MotionEventListener motionEventListener, SensorManager sensorManager) {
-        this.motionEventListener = motionEventListener;
-        this.sensorManager = sensorManager;
-    }
+//    public RunnableThread(MotionEventListener motionEventListener, SensorManager sensorManager) {
+//        this.motionEventListener = motionEventListener;
+//        this.sensorManager = sensorManager;
+//    }
 
     @Override
     public void run() {
@@ -28,11 +28,11 @@ public class RunnableThread implements Runnable {
             amplitudeRecorder.startRecording();
         }
 
-        if (motionEventListener != null) {
-            sensorManager.registerListener(motionEventListener,
-                    sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-                    SensorManager.SENSOR_DELAY_NORMAL);
-        }
+//        if (motionEventListener != null) {
+//            sensorManager.registerListener(motionEventListener,
+//                    sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
+//                    SensorManager.SENSOR_DELAY_NORMAL);
+//        }
     }
 
 }
