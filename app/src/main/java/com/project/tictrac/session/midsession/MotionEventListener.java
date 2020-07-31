@@ -105,16 +105,6 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
                     SensorManager.SENSOR_DELAY_NORMAL);
         }
 
-
-//       sensorManager.unregisterListener(this);
-//       sensorManager.flush(this);
-//
-//        MotionEventListener newMotionEventListener = new MotionEventListener(context, mViewModel, sensorManager);
-//
-//        sensorManager.registerListener(newMotionEventListener,
-//                sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION),
-//                SensorManager.SENSOR_DELAY_NORMAL);
-
     }
 
 
