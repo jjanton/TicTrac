@@ -16,11 +16,10 @@ public class SessionDetails implements Serializable {
     private String motionSensitivity;
     private String audioSensitivity;
     private boolean hapticFeedback;
-    private boolean audioFeedback;
 
     public SessionDetails(int timerValue, String ticName, boolean motionSensor,
                           boolean audioSensor, String motionSensitivity, String audioSensitivity,
-                          boolean hapticFeedback, boolean audioFeedback) {
+                          boolean hapticFeedback) {
         this.timerValue = timerValue;
         this.ticName = ticName;
         this.motionSensor = motionSensor;
@@ -28,7 +27,6 @@ public class SessionDetails implements Serializable {
         this.motionSensitivity = motionSensitivity;
         this.audioSensitivity = audioSensitivity;
         this.hapticFeedback = hapticFeedback;
-        this.audioFeedback = audioFeedback;
     }
 
     public int getTimerValue() { return timerValue; }
@@ -48,9 +46,5 @@ public class SessionDetails implements Serializable {
     public String getAudioSensitivity() { return audioSensitivity; }
 
     public boolean getHapticFeedback() { return hapticFeedback; }
-
-    public boolean getAudioFeedback() {
-        return audioFeedback;
-    }
 
 }

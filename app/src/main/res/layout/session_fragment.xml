@@ -158,25 +158,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16sp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="289dp"
         android:textOff="@string/haptic_feedback_off"
         android:textOn="@string/haptic_feedback_on"
-        app:layout_constraintEnd_toStartOf="@+id/audioFeedbackToggleButton2"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton2" />
-
-    <ToggleButton
-        android:id="@+id/audioFeedbackToggleButton2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16sp"
-        android:layout_marginTop="32dp"
-        android:textOff="@string/sound_off"
-        android:textOn="@string/sound_on"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/hapticFeedbackToggleButton2"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton2" />
 
     <ImageButton
@@ -195,13 +183,13 @@
         android:id="@+id/endSessionButton"
         android:layout_width="127dp"
         android:layout_height="128dp"
-        android:src="@drawable/ic_baseline_cancel_24"
+        android:layout_marginBottom="44dp"
         android:background="@color/material_on_background_disabled"
+        android:src="@drawable/ic_baseline_cancel_24"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/pauseButton"
-        app:layout_constraintTop_toBottomOf="@+id/audioFeedbackToggleButton2" />
+        app:layout_constraintStart_toEndOf="@+id/pauseButton" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

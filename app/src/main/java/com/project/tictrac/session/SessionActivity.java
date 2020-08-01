@@ -27,6 +27,7 @@ public class SessionActivity extends AppCompatActivity implements SessionActivit
      * This is a callback method, called from SessionSetupFragment in order to pass user
      * input values for timer, haptic, audio, and visual feedback from the SessionSetupFragment,
      * to SessionActivity, and then to a SessionFragment we create here
+     *
      * @param details SessionDetails object with values for timer, haptic/audio/visual feedback
      */
     @Override

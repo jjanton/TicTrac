@@ -63,9 +63,7 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
                     Utils.vibrate(500, context);
                 }
 
-                mViewModelHandler.post(() -> {
-                    mViewModel.incrementMotionCounter();
-                });
+                mViewModelHandler.post(() -> mViewModel.incrementMotionCounter());
 
                 resetSensor();
             }
@@ -94,7 +92,7 @@ public class MotionEventListener extends AppCompatActivity implements SensorEven
 
     public void resetSensor() {
 
-        if (! mViewModel.isTimerPaused()) {
+        if (!mViewModel.isTimerPaused()) {
             sensorManager.unregisterListener(mViewModel.getMotionEventListener());
             mViewModel.setMotionEventListener(null);
 

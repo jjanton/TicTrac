@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Set button listeners
         setButtonListeners();
-
     }
 
     private void setButtonListeners() {
