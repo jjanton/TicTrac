@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#206C91"
-    tools:context=".session.presession.SessionSetupFragment"
-    >
+    tools:context=".session.presession.SessionSetupFragment">
 
     <EditText
         android:id="@+id/timerTextView"
@@ -173,25 +172,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16sp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="305dp"
         android:textOff="@string/haptic_feedback_off"
         android:textOn="@string/haptic_feedback_on"
-        app:layout_constraintEnd_toStartOf="@+id/audioFeedbackToggleButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton" />
-
-    <ToggleButton
-        android:id="@+id/audioFeedbackToggleButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16sp"
-        android:layout_marginTop="32dp"
-        android:textOff="@string/sound_off"
-        android:textOn="@string/sound_on"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/hapticFeedbackToggleButton"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/audioSensorToggleButton" />
 
 

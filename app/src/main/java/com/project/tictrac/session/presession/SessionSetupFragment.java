@@ -37,7 +37,6 @@ public class SessionSetupFragment extends Fragment {
     private ToggleButton motionSensorToggleButton;
     private ToggleButton audioSensorToggleButton;
     private ToggleButton hapticFeedbackToggleButton;
-    private ToggleButton audioFeedbackToggleButton;
     private RadioGroup motionSensorRadioGroup;
     private RadioGroup audioSensorRadioGroup;
 
@@ -92,7 +91,6 @@ public class SessionSetupFragment extends Fragment {
         motionSensorToggleButton = getView().findViewById(R.id.motionSensorToggleButton);
         audioSensorToggleButton = getView().findViewById(R.id.audioSensorToggleButton);
         hapticFeedbackToggleButton = getView().findViewById(R.id.hapticFeedbackToggleButton);
-        audioFeedbackToggleButton = getView().findViewById(R.id.audioFeedbackToggleButton);
         audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
         motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
@@ -148,7 +146,7 @@ public class SessionSetupFragment extends Fragment {
             if (timerTextView.getText().toString().equals("")
                     || Integer.parseInt(timerTextView.getText().toString()) < 1
                     || ticNameTextView.getText().toString().equals("")) {
-                Toast.makeText(getContext(), "Enter a tic name and a timer value of at least 1 minute!",
+                Toast.makeText(getContext(), "Please Enter A Tic Name And A Timer Value Of At Least 1 Minute",
                         Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -160,8 +158,7 @@ public class SessionSetupFragment extends Fragment {
                     audioSensorToggleButton.isChecked(),
                     motionSensorRadioButton == null ? "Medium" : motionSensorRadioButton.getText().toString(),
                     audioSensorRadioButton == null ? "Medium" : audioSensorRadioButton.getText().toString(),
-                    hapticFeedbackToggleButton.isChecked(),
-                    audioFeedbackToggleButton.isChecked()
+                    hapticFeedbackToggleButton.isChecked()
             );
 
             activityCallback.beginSessionButtonClicked(details);
@@ -174,7 +171,6 @@ public class SessionSetupFragment extends Fragment {
         motionSensorToggleButton.setChecked(false);
         audioSensorToggleButton.setChecked(false);
         hapticFeedbackToggleButton.setChecked(false);
-        audioFeedbackToggleButton.setChecked(false);
         Utils.setRadioGroup(motionSensorRadioGroup, false);
         Utils.setRadioGroup(audioSensorRadioGroup, false);
         motionSensorRadioGroup.clearCheck();

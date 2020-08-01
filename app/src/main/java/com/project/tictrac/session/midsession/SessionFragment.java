@@ -7,14 +7,12 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
-import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -30,18 +28,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
-import com.project.tictrac.session.SessionActivityCallback;
 import com.project.tictrac.session.presession.SessionDetails;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.SENSOR_SERVICE;
@@ -63,9 +55,10 @@ public class SessionFragment extends Fragment {
     private RadioGroup motionSensorRadioGroup;
     private RadioGroup audioSensorRadioGroup;
     private ToggleButton hapticFeedbackToggleButton2;
-    private ToggleButton audioFeedbackToggleButton2;
     private ImageButton pauseButton;
     private ImageButton endSessionButton;
+
+    private boolean firstTime;
 
     private boolean motionSensorPreviouslyEnabled = false;
     private boolean audioSensorPreviouslyEnabled = false;
@@ -83,14 +76,12 @@ public class SessionFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
         pauseEverything();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         resumeEverything();
     }
 
@@ -113,8 +104,6 @@ public class SessionFragment extends Fragment {
                 getActivity().getApplication(), this);
         mViewModel = new ViewModelProvider(this, factory).get(SessionViewModel.class);
 
-        mViewModel.setTimerPaused(false);
-
         sensorManager = (SensorManager) requireContext().getSystemService(SENSOR_SERVICE);
 
         // Get UI elements
@@ -126,7 +115,6 @@ public class SessionFragment extends Fragment {
         motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
         hapticFeedbackToggleButton2 = getView().findViewById(R.id.hapticFeedbackToggleButton2);
-        audioFeedbackToggleButton2 = getView().findViewById(R.id.audioFeedbackToggleButton2);
         motionCounter.setText("Motion Counter: 0");
         audioCounter.setText("Audio Counter: 0");
         pauseButton = getView().findViewById(R.id.pauseButton);
@@ -147,7 +135,6 @@ public class SessionFragment extends Fragment {
             mViewModel.setAudioSensorEnabled(sessionDetails.getAudioSensor());
 
             mViewModel.setHapticFeedbackEnabled(sessionDetails.getHapticFeedback());
-            mViewModel.setAudioFeedbackEnabled(sessionDetails.getAudioFeedback());
 
             mViewModel.setMotionSensitivity(sessionDetails.getMotionSensitivity());
             mViewModel.setAudioSensitivity(sessionDetails.getAudioSensitivity());
@@ -176,7 +163,11 @@ public class SessionFragment extends Fragment {
         OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                displayNewLinkPopup(getContext());
+                displayNewPopup(getContext(),
+                        "Warning",
+                        "Any Changes Will Not Be Saved. Are You Sure?",
+                        "Return To Main Menu",
+                        "Cancel");
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), backPressedCallback);
@@ -247,22 +238,34 @@ public class SessionFragment extends Fragment {
             }
         });
 
-        audioFeedbackToggleButton2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.setAudioFeedbackEnabled(audioFeedbackToggleButton2.isChecked());
-            }
-        });
-
         pauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mViewModel.isTimerPaused() && countDownTimer != null) {
                     pauseEverything();
-                }
-                else {
+                } else {
                     resumeEverything();
                 }
+            }
+        });
+
+        endSessionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                AlertDialog popup = new AlertDialog.Builder(getContext())
+                        .setTitle("Warning")
+                        .setMessage("This Will End The Current Session. Are You Sure?")
+                        .setNegativeButton("Cancel", null)
+                        .setPositiveButton("End Session", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                pauseEverything();
+                                endSession();
+                            }
+                        })
+                        .create();
+                popup.show();
             }
         });
     }
@@ -308,9 +311,7 @@ public class SessionFragment extends Fragment {
         if (mViewModel.isHapticFeedbackEnabled()) {
             this.hapticFeedbackToggleButton2.setChecked(true);
         }
-        if (mViewModel.isAudioFeedbackEnabled()) {
-            this.audioFeedbackToggleButton2.setChecked(true);
-        }
+
     }
 
     /**
@@ -378,9 +379,10 @@ public class SessionFragment extends Fragment {
         }
     }
 
-    // referenced from https://developer.android.com/reference/android/os/CountDownTimer
+    // referenced (in part) from https://developer.android.com/reference/android/os/CountDownTimer
     private CountDownTimer createCountDownTimer(long millis, int interval) {
         mViewModel.setTimerPaused(false);
+        firstTime = true;
 
         return new CountDownTimer(millis, interval) {
 
@@ -391,7 +393,9 @@ public class SessionFragment extends Fragment {
                     mViewModel.setTimerPaused(true);
                     countDownTimer = null;
                 } else {
+                    firstTime = false;
                     mViewModel.setTimeRemaining(millisUntilFinished);
+                    mViewModel.setTimerPaused(false);
                     countdownTimerTextView.setText(String.format("%s:%s",
                             TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % 60,
                             TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60
@@ -402,21 +406,21 @@ public class SessionFragment extends Fragment {
 
             @Override
             public void onFinish() {
-                System.out.println("IN THE ON FINISH");
-                if (countDownTimer != null && !mViewModel.isTimerPaused()) {
-//                    endSession();
+                if (!firstTime) {
+                    endSession();
                 }
             }
         }.start();
+
     }
 
     // Referenced (in part) from: https://www.sitepoint.com/starting-android-development-creating-todo-app/
-    private void displayNewLinkPopup(Context context) {
+    private void displayNewPopup(Context context, String title, String message, String positive, String negative) {
         AlertDialog popup = new AlertDialog.Builder(context)
-                .setTitle("Warning")
-                .setMessage("Any changes will not be saved. Are you sure?")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("Go Back", new DialogInterface.OnClickListener() {
+                .setTitle(title)
+                .setMessage(message)
+                .setNegativeButton(negative, null)
+                .setPositiveButton(positive, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         stopReadingAudioData();
@@ -463,6 +467,8 @@ public class SessionFragment extends Fragment {
     }
 
     private void endSession() {
+        stopReadingAudioData();
+        stopReadingMotionData();
         createDialogFragment();
     }
 
@@ -479,7 +485,6 @@ public class SessionFragment extends Fragment {
     }
 
     private void pauseEverything() {
-
         if (countDownTimer != null) {
             pauseTimer(mViewModel.getTimeRemaining());
         }

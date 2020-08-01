@@ -11,12 +11,10 @@ import androidx.fragment.app.DialogFragment;
 
 import com.project.tictrac.Utils;
 
-// This class referenced (in part) from: https://guides.codepath.com/android/using-dialogfragment
+// This class and methods referenced (in part) from: https://guides.codepath.com/android/using-dialogfragment
 public class EndSessionDialogFragment extends DialogFragment {
 
-    public EndSessionDialogFragment() {
-
-    }
+    public EndSessionDialogFragment() { }
 
     public static EndSessionDialogFragment newInstance(String ticName, String motionCounterValue, String audioCounterValue) {
         EndSessionDialogFragment fragment = new EndSessionDialogFragment();
