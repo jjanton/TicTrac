@@ -16,4 +16,20 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="CustomSwitch" parent="Theme.MaterialComponents">
+        <!-- active thumb & track color (30% transparency) -->
+        <item name="colorControlActivated">#FFFBA1</item>
+
+        <!-- inactive thumb color -->
+        <item name="colorSwitchThumbNormal">#C8E8F7</item>
+
+        <!-- inactive track color (30% transparency) -->
+        <item name="android:colorForeground">#C8E8F7</item>
+    </style>
+
+    <style name="CustomRadio" parent="Theme.MaterialComponents">
+        <item name="colorOnSurface">#000000</item>
+        <item name="colorSecondary">#FFFBA1</item>
+    </style>
+
 </resources>
