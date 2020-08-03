@@ -13,14 +13,10 @@
     <string name="view_past_session_results">PREVIOUS SESSION RESULTS</string>
     <string name="title_activity_session">SessionActivity</string>
 
-    <string name="haptic_feedback_off">HAPTIC: OFF</string>
-    <string name="haptic_feedback_on">HAPTIC: ON</string>
-    <string name="sound_off">SOUND: OFF</string>
-    <string name="sound_on">SOUND: ON</string>
-    <string name="motion_off">MOTION: OFF</string>
-    <string name="motion_on">MOTION: ON</string>
-    <string name="mic_off">MIC: OFF</string>
-    <string name="mic_on">MIC: ON</string>
+    <string name="haptic_feedback">HAPTIC</string>
+    <string name="sound">SOUND</string>
+    <string name="motion">MOTION</string>
+    <string name="mic">MIC</string>
 
     <string name="begin_session">BEGIN SESSION</string>
 </resources>

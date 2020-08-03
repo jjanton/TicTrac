@@ -20,8 +20,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 import com.project.tictrac.session.SessionActivityCallback;
@@ -34,9 +34,9 @@ public class SessionSetupFragment extends Fragment {
 
     private TextView ticNameTextView;
     private TextView timerTextView;
-    private ToggleButton motionSensorToggleButton;
-    private ToggleButton audioSensorToggleButton;
-    private ToggleButton hapticFeedbackToggleButton;
+    private SwitchMaterial motionSensorSwitch;
+    private SwitchMaterial audioSensorSwitch;
+    private SwitchMaterial hapticFeedbackSwitch;
     private RadioGroup motionSensorRadioGroup;
     private RadioGroup audioSensorRadioGroup;
 
@@ -88,9 +88,9 @@ public class SessionSetupFragment extends Fragment {
 
         timerTextView = getView().findViewById(R.id.timerTextView);
         ticNameTextView = getView().findViewById(R.id.ticNameTextView);
-        motionSensorToggleButton = getView().findViewById(R.id.motionSensorToggleButton);
-        audioSensorToggleButton = getView().findViewById(R.id.audioSensorToggleButton);
-        hapticFeedbackToggleButton = getView().findViewById(R.id.hapticFeedbackToggleButton);
+        motionSensorSwitch = getView().findViewById(R.id.motionSensorSwitch);
+        audioSensorSwitch = getView().findViewById(R.id.audioSensorSwitch);
+        hapticFeedbackSwitch = getView().findViewById(R.id.hapticFeedbackSwitch);
         audioSensorRadioGroup = getView().findViewById(R.id.audioSensorRadioGroup);
         motionSensorRadioGroup = getView().findViewById(R.id.motionSensorRadioGroup);
         startSessionButton = getView().findViewById(R.id.startSessionButton);
@@ -100,10 +100,10 @@ public class SessionSetupFragment extends Fragment {
     }
 
     private void setButtonListeners() {
-        motionSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+        motionSensorSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (motionSensorToggleButton.isChecked()) {
+                if (motionSensorSwitch.isChecked()) {
                     Utils.setRadioGroup(motionSensorRadioGroup, true);
                 } else {
                     Utils.setRadioGroup(motionSensorRadioGroup, false);
@@ -112,13 +112,13 @@ public class SessionSetupFragment extends Fragment {
         });
 
         // Listener for audioSensor toggle
-        audioSensorToggleButton.setOnClickListener(new View.OnClickListener() {
+        audioSensorSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (audioSensorToggleButton.isChecked()) {
+                if (audioSensorSwitch.isChecked()) {
 
                     if (Utils.isAudioPermissionGranted(getContext())) {
-                        audioSensorToggleButton.setChecked(true);
+                        audioSensorSwitch.setChecked(true);
                         Utils.setRadioGroup(audioSensorRadioGroup, true);
                     } else {
                         requestPermissions(new String[]{
@@ -154,11 +154,11 @@ public class SessionSetupFragment extends Fragment {
             SessionDetails details = new SessionDetails(
                     Integer.parseInt(timerTextView.getText().toString()),
                     ticNameTextView.getText().toString(),
-                    motionSensorToggleButton.isChecked(),
-                    audioSensorToggleButton.isChecked(),
+                    motionSensorSwitch.isChecked(),
+                    audioSensorSwitch.isChecked(),
                     motionSensorRadioButton == null ? "Medium" : motionSensorRadioButton.getText().toString(),
                     audioSensorRadioButton == null ? "Medium" : audioSensorRadioButton.getText().toString(),
-                    hapticFeedbackToggleButton.isChecked()
+                    hapticFeedbackSwitch.isChecked()
             );
 
             activityCallback.beginSessionButtonClicked(details);
@@ -168,9 +168,9 @@ public class SessionSetupFragment extends Fragment {
     private void clearAllSettings() {
         ticNameTextView.setText(null);
         timerTextView.setText(null);
-        motionSensorToggleButton.setChecked(false);
-        audioSensorToggleButton.setChecked(false);
-        hapticFeedbackToggleButton.setChecked(false);
+        motionSensorSwitch.setChecked(false);
+        audioSensorSwitch.setChecked(false);
+        hapticFeedbackSwitch.setChecked(false);
         Utils.setRadioGroup(motionSensorRadioGroup, false);
         Utils.setRadioGroup(audioSensorRadioGroup, false);
         motionSensorRadioGroup.clearCheck();
@@ -187,13 +187,13 @@ public class SessionSetupFragment extends Fragment {
             Toast.makeText(getContext(), "Audio Permission Granted",
                     Toast.LENGTH_SHORT).show();
 
-            audioSensorToggleButton.setChecked(true);
+            audioSensorSwitch.setChecked(true);
             Utils.setRadioGroup(audioSensorRadioGroup, true);
         } else {
             Toast.makeText(getContext(), "Audio Permissions Are Required To Use This Feature",
                     Toast.LENGTH_LONG).show();
 
-            audioSensorToggleButton.setChecked(false);
+            audioSensorSwitch.setChecked(false);
             Utils.setRadioGroup(audioSensorRadioGroup, false);
         }
     }

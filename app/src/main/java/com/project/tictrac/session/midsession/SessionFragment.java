@@ -29,6 +29,8 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
 import com.project.tictrac.session.presession.SessionDetails;
@@ -50,11 +52,11 @@ public class SessionFragment extends Fragment {
     private TextView countdownTimerTextView;
     private TextView motionCounter;
     private TextView audioCounter;
-    private ToggleButton motionSensorToggleButton2;
-    private ToggleButton audioSensorToggleButton2;
+    private SwitchMaterial motionSensorToggleButton2;
+    private SwitchMaterial audioSensorToggleButton2;
     private RadioGroup motionSensorRadioGroup;
     private RadioGroup audioSensorRadioGroup;
-    private ToggleButton hapticFeedbackToggleButton2;
+    private SwitchMaterial hapticFeedbackToggleButton2;
     private ImageButton pauseButton;
     private ImageButton endSessionButton;
 
@@ -243,8 +245,10 @@ public class SessionFragment extends Fragment {
             public void onClick(View v) {
                 if (!mViewModel.isTimerPaused() && countDownTimer != null) {
                     pauseEverything();
+                    pauseButton.setImageResource(R.drawable.ic_play_circle_outline_24);
                 } else {
                     resumeEverything();
+                    pauseButton.setImageResource(R.drawable.ic_pause_circle_outline_24);
                 }
             }
         });
