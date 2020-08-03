@@ -11,7 +11,6 @@ import com.project.tictrac.session.SessionActivity;
 
 public class MainActivity extends AppCompatActivity {
     private Button sessionActivityButton;
-    private Button statsActivityButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +19,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Get references to buttons
         sessionActivityButton = findViewById(R.id.sessionActivityButton);
-        statsActivityButton = findViewById(R.id.statsActivityButton);
 
         // Set button listeners
         setButtonListeners();
@@ -31,12 +29,6 @@ public class MainActivity extends AppCompatActivity {
         sessionActivityButton.setOnClickListener(v -> {
             Intent i = new Intent(this, SessionActivity.class);
             startActivity(i);
-        });
-
-        // Launch StatsActivity on button click
-        statsActivityButton.setOnClickListener(v -> {
-//            Intent i = new Intent(this, StatsActivity.class);
-//            startActivity(i);
         });
     }
 

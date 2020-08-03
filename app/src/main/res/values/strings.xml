@@ -19,4 +19,15 @@
     <string name="mic">MIC</string>
 
     <string name="begin_session">BEGIN SESSION</string>
+    <string name="tic_trac">Tic Trac</string>
+    <string name="slash">/</string>
+    <string name="logo">logo</string>
+    <string name="enter_value_for_timer">Enter value for timer</string>
+    <string name="enter_tic_name">Enter Tic Name</string>
+    <string name="low">Low</string>
+    <string name="medium">Medium</string>
+    <string name="high">High</string>
+    <string name="pauseButton"></string>
+    <string name="endSessionButton"></string>
+
 </resources>

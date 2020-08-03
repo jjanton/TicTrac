@@ -18,7 +18,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -29,7 +28,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.SavedStateViewModelFactory;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.project.tictrac.R;
 import com.project.tictrac.Utils;
@@ -245,10 +243,8 @@ public class SessionFragment extends Fragment {
             public void onClick(View v) {
                 if (!mViewModel.isTimerPaused() && countDownTimer != null) {
                     pauseEverything();
-                    pauseButton.setImageResource(R.drawable.ic_play_circle_outline_24);
                 } else {
                     resumeEverything();
-                    pauseButton.setImageResource(R.drawable.ic_pause_circle_outline_24);
                 }
             }
         });
@@ -374,6 +370,11 @@ public class SessionFragment extends Fragment {
         }
     }
 
+    /**
+     * This method was referenced (in part) from Google documentation on MediaRecorder,
+     * https://developer.android.com/guide/topics/media/mediarecorder, and
+     * from Professional Android Sensor Programming, Milette & Stroud,
+     */
     private void stopReadingAudioData() {
         mViewModel.setAudioSensorEnabled(false);
 
@@ -460,6 +461,7 @@ public class SessionFragment extends Fragment {
         }
     }
 
+    // Referenced from: https://guides.codepath.com/android/using-dialogfragment
     private void createDialogFragment() {
         FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
         EndSessionDialogFragment dialogFragment = EndSessionDialogFragment.newInstance(
@@ -489,6 +491,8 @@ public class SessionFragment extends Fragment {
     }
 
     private void pauseEverything() {
+        pauseButton.setImageResource(R.drawable.ic_play_circle_outline_24);
+
         if (countDownTimer != null) {
             pauseTimer(mViewModel.getTimeRemaining());
         }
@@ -507,6 +511,8 @@ public class SessionFragment extends Fragment {
     }
 
     private void resumeEverything() {
+        pauseButton.setImageResource(R.drawable.ic_pause_circle_outline_24);
+
         resumeTimer();
 
         if (motionSensorPreviouslyEnabled) {

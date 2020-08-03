@@ -43,7 +43,7 @@ public class MaxAmplitudeRecorder {
     /**
      * This method was referenced (in part) from Professional Android Sensor Programming, Milette & Stroud,
      */
-    public void startRecording()  {
+    public void startRecording() {
         prepareMediaRecorder();
         continueRecording = true;
         mediaRecorder.getMaxAmplitude();
@@ -54,7 +54,7 @@ public class MaxAmplitudeRecorder {
 
             if (maxAmplitude >= THRESHOLD) {
                 if (mViewModel.isHapticFeedbackEnabled()) {
-                    Utils.vibrate(1000, context);
+                    Utils.vibrate(500, context);
                 }
 
                 mViewModelHandler.post(() -> {
